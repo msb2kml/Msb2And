@@ -1,0 +1,51 @@
+* Primary data
+*
+Time;Temps;                 t
+ A:00;Rx V
+ A:01;LQI
+ A:02;Volt;                 v
+ A:03;Amp;                  i
+ A:04;mAh
+ A:05;RPM
+ A:06;Height;               h
+ A:07;Vario;                b
+ A:08;-
+ A:09;Speed GPS;            K
+ A:10;Height GPS;           a
+ A:11;Dist 3D
+ A:12;Addr12
+ A:13;Addr13
+ A:14;Addr14
+ A:15;Temp
+* Secondary (computed) data
+*
+* Differences
+=DIF,$t,$T;-;               s
+* Power and energy
+=PROD,$i,$v;Watt;           w
+=NRJ,$w,$s,$j;W.min;        j
+* Battery resistance
+=BIR,1,$i,$V,$v;mOhm
+* Filtered vario
+=SMTH,0.1,$b,$B;fVario;     B
+* Filtered height
+=SMTH,0.1,$h,$Z;fHeight;    Z
+=DIF,$Z,$H;-;               d
+* Traveled distance
+=TRV,$K,$#;Km;              L
+* Colorisation
+=COL,-0.35,0.35,$B;-;       %
+* Climbing
+=CUMP,$d,$U;Deniv+;         U
+=CUMN,$d,$u;Deniv-;         u
+* Separation motor/soaring
+=MOT,1,$i,$s,$M;Motor s;    M
+=SOA,1,$i,$s,$m;Soar s;     m
+* Glide Ratio
+=GLR,0.05,$#,$a;G.Ratio
+* Memory
+=MEM,$t;-;                  T
+=MEM,$Z;-;                  H
+=HVL,1,$i,$v,$V;-;          V
+
+

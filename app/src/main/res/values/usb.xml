@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="MPX_VID">0x10c4</integer>
+    <integer name="MPX_PID">0x81a9</integer>
+</resources>

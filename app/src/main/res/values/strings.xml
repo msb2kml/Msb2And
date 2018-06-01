@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Msb2And</string>
+    <string name="MSBlog">/MSBlog</string>
+    <string name="title_activity_storage">Storage</string>
+    <string name="PrefName">Msb2And</string>
+</resources>
