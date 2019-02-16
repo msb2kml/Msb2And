@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="org.js.Msb2And.MainActivity"
+            android:name=".MainActivity"
             android:clearTaskOnLaunch="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait">
@@ -24,20 +24,19 @@
         </activity>
 
         <service
-            android:name="org.js.Msb2And.UsbService"
+            android:name=".UsbService"
             android:enabled="true"
-            android:exported="true"></service>
-
-        <activity android:name="org.js.Msb2And.Monitor"
-            android:screenOrientation="portrait">
-        </activity>
+            android:exported="true" />
 
         <activity
-            android:name="org.js.Msb2And.Storage"
+            android:name=".Monitor"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".Storage"
             android:label="@string/title_activity_storage"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".Selector"></activity>
     </application>
 
 </manifest>

@@ -62,7 +62,7 @@ public class Storage extends AppCompatActivity {
         bForget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(0,intent);
+                setResult(RESULT_CANCELED,intent);
                 finish();
             }
         });
@@ -73,7 +73,7 @@ public class Storage extends AppCompatActivity {
                 comment=viewComment.getText().toString();
                 intent.putExtra("plane",plane);
                 intent.putExtra("comment",comment);
-                setResult(1,intent);
+                setResult(RESULT_OK,intent);
                 finish();
             }
         });

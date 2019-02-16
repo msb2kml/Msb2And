@@ -22,7 +22,10 @@ public class DispRecord {
     private ListView list;
     private Context contextMoni;
     public Button onAir;
-    private boolean fromRx;
+    private int from;
+    private int Rx;
+    private int Soufl;
+    private int Simu;
     public TextView secText;
     private WeakReference<Monitor> mActivity;
     private MyListAdapter mAdapter;
@@ -34,20 +37,30 @@ public class DispRecord {
     private Calendar startTime=null;
     private String plane="";
     private String comment="";
+    private boolean named;
+    private boolean[] minus=new boolean[16];
 
     public void setVar(Context context, WeakReference<Monitor> mActivity,
-                       boolean fromRx, String pathMSBfile, String pathMeta,
+                       int from, String pathMSBfile, String pathMeta,
                        String plane, String comment){
         this.contextMoni=context;
+        Rx=context.getResources().getInteger(R.integer.Rx);
+        Soufl=context.getResources().getInteger(R.integer.Soufl);
+        Simu=context.getResources().getInteger(R.integer.Simu);
         this.mActivity=mActivity;
-        this.fromRx=fromRx;
+        this.from=from;
         this.pathMSBfile=pathMSBfile;
         this.pathMeta=pathMeta;
         this.plane=plane;
         this.comment=comment;
         onAir=(Button) mActivity.get().findViewById(R.id.onair);
         secText=(TextView) mActivity.get().findViewById(R.id.when);
-
+        named=mActivity.get().named;
+        for (int i=0;i<16;i++){
+            if (named){
+                minus[i]=mActivity.get().names[i].matches("-");
+            } else minus[i]=false;
+        }
         return;
     }
 
@@ -58,7 +71,7 @@ public class DispRecord {
         if (list==null){
             list=(ListView) mActivity.get().findViewById(R.id.list);
             for (int i=0; i<16; i++){
-                if (fullSensor.record[i]!=null){
+                if (fullSensor.record[i]!=null && !minus[i]){
                     if (fullSensor.logTime>2) fullSensor.record[i].chkXtrm();
                     objects.add((fullSensor.record[i]));
                 }
@@ -79,7 +92,7 @@ public class DispRecord {
                     if (asmbl[i] == null) asmbl[i] = fullSensor.record[i];
                     else asmbl[i].cp(fullSensor.record[i]);
                 }
-                if (asmbl[i] != null) {
+                if (asmbl[i] != null && !minus[i]) {
                     if (fullSensor.logTime>2) asmbl[i].chkXtrm();
                     objects.add(asmbl[i]);
                 }
@@ -116,8 +129,8 @@ public class DispRecord {
         catch (Exception e){
             outMSBfile=null;
         }
-        if (fromRx) onAir.setText("Rx on");
-        else onAir.setText("On Air");
+        if (from==Rx) onAir.setText("Rx on");
+        else if (from==Soufl) onAir.setText("On Air");
         secText.setText(lastSensor.prTime());
         nMeas++;
         if (outMSBfile!=null){

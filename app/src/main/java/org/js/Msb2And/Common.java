@@ -27,15 +27,19 @@ public class Common {
     public boolean writeSD;
     public String pathMSBlog;
     public String pathAddr;
+    public String pathStartGPS;
     public boolean isMSBlog;
     public boolean isAddr;
     public boolean named;
     public int minMSBnb=5000;
     public String plane="";
     public String comment="";
+    public String startName="";
+    public String Directory;
     public String sltMSBf=null;
     public String pathMeta=null;
     public int REQUEST_WRITE_STORAGE=100;
+    String exPath=Environment.getExternalStorageDirectory().getAbsolutePath();
 
     public void fetchPref(Context context){
         SharedPreferences pref=context.getSharedPreferences(
@@ -43,6 +47,8 @@ public class Common {
         minMSBnb=pref.getInt("minMSBnb",5000);
         plane=pref.getString("Plane","");
         comment=pref.getString("Comment","");
+        startName=pref.getString("StartName",null);
+        Directory=pref.getString("Directory",exPath);
         return;
     }
 
@@ -53,6 +59,8 @@ public class Common {
         edit.putInt("minMSBnb",minMSBnb);
         edit.putString("Plane",plane);
         edit.putString("Comment",comment);
+        edit.putString("StartName",startName);
+        edit.putString("Directory",Directory);
         edit.apply();
         return;
     }
@@ -61,9 +69,9 @@ public class Common {
         this.mActivity=mActivity;
         this.context=context;
         String exPath= Environment.getExternalStorageDirectory().getAbsolutePath();
-        pathMSBlog=exPath+"/MSBlog";
+        pathMSBlog=exPath+"/"+context.getString(R.string.MSBlog);
         String state=Environment.getExternalStorageState();
-        mountedSD=Environment.MEDIA_MOUNTED.equals(state);
+        mountedSD=state.contains(Environment.MEDIA_MOUNTED);
         if (!mountedSD){
             Toast.makeText(context,exPath+" not mounted: no recording.",
                     Toast.LENGTH_LONG).show();
@@ -106,6 +114,7 @@ public class Common {
             mActivity.get().start1();
         } else {
             pathAddr=pathMSBlog+"/AddrSens.txt";
+            pathStartGPS=pathMSBlog+"/StartGPS.gpx";
             File faddr=new File(pathAddr);
             isAddr=faddr.exists();
             if (!isAddr){

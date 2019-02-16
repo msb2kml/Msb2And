@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="Rx">21</integer>
+    <integer name="Soufl">22</integer>
+    <integer name="Simu">23</integer>
+</resources>

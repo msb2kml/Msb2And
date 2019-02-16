@@ -5,15 +5,19 @@ data collected by the sensors on the MSB telemetry bus.
 The Android device is connected remotely through a
 [Multiplex Souffleur](https://www.multiplex-rc.de/produkte/45185-souffleur-deutsch) or
 directly to the MSB bus of the receiver (for a test on the ground).
+It could also be connected to the COM port of a Multiplex HF module.
 
 You need a USB-OTG cable and a
 [Multiplex USB interface](https://www.multiplex-rc.de/produkte/85149-usb-pc-kabel-rx-s-telemetrie-uni).
 
 If the application is authorized to write to the storage system,
-it could record files with the same format as the 
+it could record files with the same format as the
 [Multiplex Flight Recorder](https://www.multiplex-rc.de/produkte/85420-flightrecorder).
 Theses files could be used with the
 [Msb2Kml application](https://github.com/msb2kml/Msb2Kml).
+
+There is also a possibility to use one of theses files to simulate
+a flight.
 
 This Android/Java application could be installed if you have
 checked that applications from other sources than Google Play
@@ -92,6 +96,8 @@ of each sensor. A line in this file of the form "** A:xx;name**" with
 for this sensor. This is compatible with the sister application
 Msb2Kml even if other features of this file are not (yet) exploited.
 The name is appended in the list to the address.
+There is a check box on the start screen to disable the use
+of this file.
 
 # Stop monitoring
 The application run until the "**Stop**" button is pushed.
@@ -115,6 +121,16 @@ use of the application.
 Then there are 2 buttons: "**Forget it**" and "**Record it**".
 The files are not recorded or erased if "**Forget it**" is pushed and kept
 if the other button is pushed.
+
+# Simulation
+This could be useful to test the configuration of the application
+without the need of a new flight.
+When you chose to make a simulation you are presented with a selection
+process for the file to use, similar to a File Explorer.
+Only the files with a name like "MSB_xxxx.csv" are considered.
+
+While the simulation is running, you could pause it.
+When you restart, you could skip some time from the flight.
 
 # Library
 This application make use of the library

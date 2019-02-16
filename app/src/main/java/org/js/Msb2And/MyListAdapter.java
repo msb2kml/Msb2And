@@ -26,7 +26,7 @@ public class MyListAdapter extends BaseAdapter {
     private WeakReference<Monitor> mActivity;
     private boolean named;
     private String pathAddr;
-    public String[] names=new String[16];
+//    public String[] names=new String[16];
 
     public MyListAdapter(final Context context, final WeakReference<Monitor> mActivity,
                          final List<SensorReading> mSensor){
@@ -34,6 +34,7 @@ public class MyListAdapter extends BaseAdapter {
         this.mSensor=mSensor;
         this.mActivity=mActivity;
         named=mActivity.get().named;
+/*
         if (named){
             pathAddr=mActivity.get().pathAddr;
             File addr=new File(pathAddr);
@@ -57,6 +58,7 @@ public class MyListAdapter extends BaseAdapter {
                 named=false;
             }
         }
+*/
     }
 
     public List<SensorReading> getSensor(){
@@ -84,6 +86,7 @@ public class MyListAdapter extends BaseAdapter {
 
         ViewHolder viewHolder;
         String nam;
+        Character deg='\ufffd';
         if (convertView==null){
             LayoutInflater inflater=((Activity) mContext).getLayoutInflater();
             convertView=inflater.inflate(R.layout.list_item,parent,false);
@@ -99,15 +102,16 @@ public class MyListAdapter extends BaseAdapter {
         }
         SensorReading obj=mSensor.get(position);
         if (obj != null){
-            if (named && names[obj.addr]!=null){
-                nam=String.valueOf(obj.addr)+"/"+names[obj.addr];
+            if (named && mActivity.get().names[obj.addr]!=null){
+                nam=String.valueOf(obj.addr)+"/"+mActivity.get().names[obj.addr];
             } else nam=String.valueOf(obj.addr);
             viewHolder.number.setText(nam);
             if (obj.alarm) viewHolder.number.setTextColor(Color.RED);
             else viewHolder.number.setTextColor(Color.BLACK);
             if (obj.valid) viewHolder.value.setText(obj.print());
             else viewHolder.value.setText("( "+obj.print()+" )");
-            viewHolder.unit.setText(obj.heading());
+            String head=obj.heading().replace(deg.toString(),"°");
+            viewHolder.unit.setText(head);
             viewHolder.minim.setText(obj.print_min());
             viewHolder.maxim.setText(obj.print_max());
         }

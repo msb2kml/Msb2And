@@ -38,6 +38,7 @@ public class SensorReading {
     }
 
     public String heading() {
+        Character deg='\ufffd';
         switch (v_class) {
             case 0:
                 return "?";
@@ -52,9 +53,9 @@ public class SensorReading {
             case 5:
                 return "t/min";
             case 6:
-                return " Â°C";
+                return deg.toString()+"C";
             case 7:
-                return " Â° ";
+                return deg.toString();
             case 8:
                 return "m";
              case 9:

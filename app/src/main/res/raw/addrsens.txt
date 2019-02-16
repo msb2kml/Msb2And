@@ -12,8 +12,8 @@ Time;Temps;                 t
  A:08;-
  A:09;Speed GPS;            K
  A:10;Height GPS;           a
- A:11;Dist 3D
- A:12;Addr12
+ A:11;Dist 2D;              /
+ A:12;Azimuth;              <
  A:13;Addr13
  A:14;Addr14
  A:15;Temp
@@ -47,5 +47,5 @@ Time;Temps;                 t
 =MEM,$t;-;                  T
 =MEM,$Z;-;                  H
 =HVL,1,$i,$v,$V;-;          V
-
+=GPS,$<,$/,$a;GPS
 
