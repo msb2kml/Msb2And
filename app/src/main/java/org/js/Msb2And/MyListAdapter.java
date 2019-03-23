@@ -22,52 +22,29 @@ import java.util.List;
 public class MyListAdapter extends BaseAdapter {
 
     private List<SensorReading> mSensor;
+    private List<Object> mObject;
     private Context mContext;
     private WeakReference<Monitor> mActivity;
     private boolean named;
     private String pathAddr;
-//    public String[] names=new String[16];
 
     public MyListAdapter(final Context context, final WeakReference<Monitor> mActivity,
-                         final List<SensorReading> mSensor){
+                         final List<Object> mObject){
+//                         final List<SensorReading> mSensor){
         this.mContext=context;
-        this.mSensor=mSensor;
+//        this.mSensor=mSensor;
+        this.mObject=mObject;
         this.mActivity=mActivity;
         named=mActivity.get().named;
-/*
-        if (named){
-            pathAddr=mActivity.get().pathAddr;
-            File addr=new File(pathAddr);
-            try {
-                BufferedReader f=new BufferedReader(new FileReader(addr));
-                String line="";
-                while (line!=null){
-                    line=f.readLine();
-                    if (line==null) continue;
-                    if (line.startsWith("*")) continue;
-                    String[] fields=line.split(";");
-                    if (fields==null || fields.length<2) continue;
-                    if (fields[0].matches(" A:[0-9]{2}")){
-                        String sub=fields[0].substring(3);
-                        int ind=Integer.valueOf(sub);
-                        if (ind>=0 && ind<16) names[ind]=fields[1].trim();
-                    }
-                }
-                f.close();
-            } catch (Exception e){
-                named=false;
-            }
-        }
-*/
     }
 
-    public List<SensorReading> getSensor(){
-        return mSensor;
-    }
+//    public List<SensorReading> getSensor(){ return mSensor; }
+    public List<Object> getSensor(){ return mObject;}
 
     @Override
     public int getCount(){
-        if (mSensor!= null) return mSensor.size();
+        if (mObject!=null) return mObject.size();
+//        if (mSensor!= null) return mSensor.size();
         return 0;
     }
 
@@ -77,19 +54,20 @@ public class MyListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int i){
-        return mSensor != null ? mSensor.get(i) : null;
-    }
+    public Object getItem(int i){ return mObject !=null ? mObject.get(i) : null; }
+//    public Object getItem(int i){ return mSensor != null ? mSensor.get(i) : null; }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
 
-        ViewHolder viewHolder;
         String nam;
         Character deg='\ufffd';
-        if (convertView==null){
-            LayoutInflater inflater=((Activity) mContext).getLayoutInflater();
-            convertView=inflater.inflate(R.layout.list_item,parent,false);
+        if (convertView==null) {
+            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+            convertView = inflater.inflate(R.layout.list_item, parent, false);
+        }
+        ViewHolder viewHolder=(ViewHolder) convertView.getTag();
+        if (viewHolder==null){
             viewHolder=new ViewHolder();
             viewHolder.number=(TextView)convertView.findViewById(R.id.number);
             viewHolder.value=(TextView)convertView.findViewById(R.id.value);
@@ -97,24 +75,37 @@ public class MyListAdapter extends BaseAdapter {
             viewHolder.minim=(TextView)convertView.findViewById(R.id.minim);
             viewHolder.maxim=(TextView)convertView.findViewById(R.id.maxim);
             convertView.setTag(viewHolder);
-        } else {
-            viewHolder=(ViewHolder) convertView.getTag();
         }
-        SensorReading obj=mSensor.get(position);
-        if (obj != null){
-            if (named && mActivity.get().names[obj.addr]!=null){
-                nam=String.valueOf(obj.addr)+"/"+mActivity.get().names[obj.addr];
-            } else nam=String.valueOf(obj.addr);
-            viewHolder.number.setText(nam);
-            if (obj.alarm) viewHolder.number.setTextColor(Color.RED);
-            else viewHolder.number.setTextColor(Color.BLACK);
-            if (obj.valid) viewHolder.value.setText(obj.print());
-            else viewHolder.value.setText("( "+obj.print()+" )");
-            String head=obj.heading().replace(deg.toString(),"°");
-            viewHolder.unit.setText(head);
-            viewHolder.minim.setText(obj.print_min());
-            viewHolder.maxim.setText(obj.print_max());
+        Object o=mObject.get(position);
+        if (o.getClass().getSimpleName().matches("SensorReading")) {
+            SensorReading obj = (SensorReading) o;
+            if (obj != null) {
+                if (named && mActivity.get().names[obj.addr] != null) {
+                    nam = String.valueOf(obj.addr) + "/" + mActivity.get().names[obj.addr];
+                } else nam = String.valueOf(obj.addr);
+                viewHolder.number.setText(nam);
+                if (obj.alarm) viewHolder.number.setTextColor(Color.RED);
+                else viewHolder.number.setTextColor(Color.BLACK);
+                if (obj.valid) viewHolder.value.setText(obj.print());
+                else viewHolder.value.setText("( " + obj.print() + " )");
+                String head = obj.heading().replace(deg.toString(), "°");
+                viewHolder.unit.setText(head);
+                viewHolder.minim.setText(obj.print_min());
+                viewHolder.maxim.setText(obj.print_max());
+            }
+        } else if (o.getClass().getSimpleName().matches("CompReading")){
+            CompReading c=(CompReading) o;
+            if (c !=null){
+                nam=c.heading;
+                viewHolder.number.setText(nam);
+                viewHolder.number.setTextColor(Color.BLACK);
+                viewHolder.value.setText(c.print());
+                viewHolder.unit.setText(c.func);
+                viewHolder.maxim.setText(c.printMax());
+                viewHolder.minim.setText(c.printMin());
+            }
         }
+        convertView.setVisibility(View.VISIBLE);
         return convertView;
     }
 

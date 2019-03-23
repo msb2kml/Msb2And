@@ -6,8 +6,8 @@ android {
         applicationId "org.js.Msb2And"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 9
-        versionName '0.9 Simulation'
+        versionCode 10
+        versionName '1.0 Functions + Remote GPS'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

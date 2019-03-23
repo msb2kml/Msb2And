@@ -1,20 +1,41 @@
 package org.js.Msb2And;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +44,16 @@ public class MainActivity extends AppCompatActivity {
     WeakReference<MainActivity> mAct;
     private static String testPath;
     String Directory;
+    Integer From=null;
+    Location startLoc=null;
+    StartGPS sGPS=null;
+    Map<String,Location> startPoints=new HashMap<>();
+    ArrayList<Location> biLoc=null;
+    String[] ar=new String[0];
+    Integer preselect=null;
+    final int activGetFix=10;
+    final int activHandFix=11;
+    final int activCopyFix=12;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void start1(){
+        final String startName=com.startName;
+        final String pathStartGPS=com.pathStartGPS;
         final Button bSouf=(Button) findViewById(R.id.buttonSouf);
         final Button bRx=(Button) findViewById(R.id.buttonRx);
         final Button bSim=(Button) findViewById(R.id.buttonSim);
@@ -92,38 +125,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (com.named) com.named=cNamed.isChecked();
-                Intent intent=new Intent(MainActivity.this,Monitor.class);
-                intent.putExtra("from",getResources().getInteger(R.integer.Soufl));
-                intent.putExtra("named",com.named);
-                intent.putExtra("pathAddr",com.pathAddr);
-                intent.putExtra("pathMSBfile",com.sltMSBf);
-                intent.putExtra("pathMeta",com.pathMeta);
-                intent.putExtra("plane",com.plane);
-                intent.putExtra("comment",com.comment);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivityForResult(intent,1);
+                From=getResources().getInteger(R.integer.Soufl);
+                if (com.named) methodGPS();
+                else launchMonitor();
             }
         });
         bRx.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (com.named) com.named=cNamed.isChecked();
-                Intent intent=new Intent(MainActivity.this,Monitor.class);
-                intent.putExtra("from",getResources().getInteger(R.integer.Rx));
-                intent.putExtra("named",com.named);
-                intent.putExtra("pathAddr",com.pathAddr);
-                intent.putExtra("pathMSBfile",com.sltMSBf);
-                intent.putExtra("pathMeta",com.pathMeta);
-                intent.putExtra("plane",com.plane);
-                intent.putExtra("comment",com.comment);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivityForResult(intent,1);
+                From=getResources().getInteger(R.integer.Rx);
+                launchMonitor();
             }
         });
         bSim.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (com.named) com.named=cNamed.isChecked();
+                From=getResources().getInteger(R.integer.Simu);
                 Intent intent=new Intent(MainActivity.this,Selector.class);
                 intent.putExtra("CurrentDir",Directory);
                 intent.putExtra("WithDir",false);
@@ -143,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("pathMeta",com.pathMeta);
         intent.putExtra("plane",com.plane);
         intent.putExtra("comment",com.comment);
+        intent.putExtra("pathStartGPS",com.pathStartGPS);
+        if (com.startName!=null) intent.putExtra("startName",com.startName);
         intent.putExtra("testPath",testPath);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivityForResult(intent,1);
@@ -150,26 +171,375 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        if (resultCode==RESULT_OK) {
             switch (requestCode) {
                 case 1:
-                    com.plane = data.getStringExtra("plane");
-                    com.comment = data.getStringExtra("comment");
-                    com.putPref(context);
+                    if (resultCode==RESULT_OK) {
+                        com.plane = data.getStringExtra("plane");
+                        com.comment = data.getStringExtra("comment");
+                        com.startName = data.getStringExtra("startName");
+                        com.putPref(context);
+                    }
                     com.bye();
                     break;
                 case 2:
-                    testPath=data.getStringExtra("Path");
-                    if (testPath==null || testPath.isEmpty()) com.bye();
-                    else {
-                        File f=new File(testPath);
-                        Directory=f.getParent();
-                        com.Directory=Directory;
-                        launchSim();
+                    if (resultCode==RESULT_OK) {
+                        testPath = data.getStringExtra("Path");
+                        if (testPath == null || testPath.isEmpty()) com.bye();
+                        else {
+                            File f = new File(testPath);
+                            Directory = f.getParent();
+                            com.Directory = Directory;
+                            From=getResources().getInteger(R.integer.Simu);
+                            if (com.named) methodGPS();
+                            else launchMonitor();
+                        }
+                    } else com.bye();
+                    break;
+                case activGetFix:
+                    if (resultCode==RESULT_OK){
+                        startLoc=data.getExtras().getParcelable("Location");
+                        com.startName=data.getStringExtra("Name");
+                        dupLoc(requestCode,0);
+                    } else {
+                        com.startName=null;
+                        launchMonitor();
+                    }
+                    break;
+                case activHandFix:
+                    if (resultCode==RESULT_OK){
+                        startLoc=data.getExtras().getParcelable("Location");
+                        com.startName=data.getStringExtra("Name");
+                        dupLoc(requestCode,0);
+                    } else {
+                        com.startName=null;
+                        launchMonitor();
+                    }
+                    break;
+                case activCopyFix:
+                    if (resultCode==RESULT_OK){
+                        com.startName=data.getStringExtra("Name");
+                        int which=data.getIntExtra("Which",0);
+                        startLoc=biLoc.get(which);
+                        dupLoc(requestCode,which);
+                    } else {
+                        com.startName=null;
+                        launchMonitor();
                     }
                     break;
             }
+    }
+
+    void dupLoc(int requestCode, final int selWhich){
+        if (sGPS==null) sGPS=new StartGPS(com.pathStartGPS);
+        startPoints=sGPS.readSG();
+        if (startLoc!=null && com.startName!=null && !com.startName.isEmpty()){
+            if (startPoints.containsKey(com.startName)){
+                AlertDialog.Builder builder=new AlertDialog.Builder(this);
+                builder.setMessage("Duplicate name")
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                com.startName=null;
+                                launchMonitor();
+                            }
+                        })
+                        .setTitle(com.startName)
+                        .setPositiveButton("Overwrite", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startPoints.remove(com.startName);
+                                startPoints.put(com.startName,startLoc);
+                                sGPS.writeSG(startPoints);
+                                launchMonitor();
+                            }
+                        })
+                        .setNegativeButton("Change", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startCopy(selWhich);
+                            }
+                        });
+                builder.show();
+            } else {
+                startPoints.put(com.startName,startLoc);
+                sGPS.writeSG(startPoints);
+                launchMonitor();
+            }
+        } else launchMonitor();
+    }
+
+    void launchMonitor(){
+        final String startName=com.startName;
+        final String pathStartGPS=com.pathStartGPS;
+        Intent intent=new Intent(MainActivity.this,Monitor.class);
+        intent.putExtra("from",From);
+        intent.putExtra("named",com.named);
+        intent.putExtra("pathAddr",com.pathAddr);
+        intent.putExtra("pathMSBfile",com.sltMSBf);
+        intent.putExtra("pathMeta",com.pathMeta);
+        intent.putExtra("plane",com.plane);
+        intent.putExtra("comment",com.comment);
+        intent.putExtra("pathStartGPS",pathStartGPS);
+        if (testPath!=null) intent.putExtra("testPath",testPath);
+        if (startName!=null) intent.putExtra("startName",startName);
+        if (startLoc!=null) intent.putExtra("Location",startLoc);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivityForResult(intent,1);
+    }
+
+    void methodGPS(){
+        final String startName=com.startName;
+        String[] items;
+        Integer sz;
+        sGPS=new StartGPS(com.pathStartGPS);
+        startPoints=sGPS.readSG();
+        if (startPoints.isEmpty()){
+            items=new String[3];
+            sz=0;
+        } else {
+            SortedSet<String> keys=new TreeSet<>();
+            keys.addAll(startPoints.keySet());
+            sz=keys.size();
+            Iterator<String> itr=((TreeSet<String>) keys).descendingIterator();
+            ar=new String[sz];
+            items=new String[sz+3];
+            String here;
+            for (int i=0;i<sz;i++) {
+                here = itr.next();
+                ar[i] = here;
+                if (startName != null && here.contentEquals(startName)) preselect = i;
+                items[i] = ar[i] + ": ";
+                items[i] += String.format(Locale.ENGLISH, "lat=%.6f ",
+                        startPoints.get(here).getLatitude());
+                items[i] += String.format(Locale.ENGLISH, "lon=%.6f ",
+                        startPoints.get(here).getLongitude());
+                items[i] += String.format(Locale.ENGLISH, "alt=%.1f",
+                        startPoints.get(here).getAltitude());
+            }
         }
-        super.onActivityResult(requestCode,resultCode,data);
+        items[sz]="Use device GPS";
+        items[sz+1]="Enter a known location";
+        items[sz+2]="Copy location from a previous flight";
+        if (preselect==null) preselect=sz;
+        AlertDialog.Builder build=new AlertDialog.Builder(this);
+        build.setTitle("Selection of Start Location");
+        build.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (preselect==null || preselect<0){
+                    com.startName=null;
+                    launchMonitor();
+                } else if (preselect<ar.length){
+                    com.startName=ar[preselect];
+                    startLoc=startPoints.get(startName);
+                    launchMonitor();
+                } else if (preselect==ar.length){
+                    startLocate();
+                } else if (preselect==ar.length+1){
+                    startEnter();
+                } else {
+                    selGPX();
+                }
+            }
+        })
+           .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        com.startName=null;
+                        launchMonitor();
+                    }
+                })
+           .setSingleChoiceItems(items, preselect, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        preselect=which;
+
+                    }
+                })
+           .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        com.startName=null;
+                        launchMonitor();
+                    }
+                });
+        build.show();
+
+    }
+
+    void startLocate(){
+        Intent intent=new Intent(this,GetFix.class);
+        if (com.startName!=null) intent.putExtra("Name",com.startName);
+        if (startLoc!=null) intent.putExtra("Location",startLoc);
+        startActivityForResult(intent,activGetFix);
+    }
+
+    void startEnter(){
+        Intent intent=new Intent(this,HandFix.class);
+        if (com.startName!=null) intent.putExtra("Name",com.startName);
+        if (startLoc!=null) intent.putExtra("Location",startLoc);
+        startActivityForResult(intent,activHandFix);
+    }
+
+    void startCopy(int which){
+        metaData m=new metaData();
+        String name=FileListe.get(which);
+        m.extract(name);
+        String pathGps=m.getPathGpx();
+        Toast toast=Toast.makeText(context,"Reading "+name,Toast.LENGTH_LONG);
+        toast.show();
+        if (sGPS==null) sGPS=new StartGPS(com.pathStartGPS);
+        biLoc=sGPS.readTrack(pathGps);
+        if (biLoc!=null && biLoc.size()==2) {
+            Intent intent=new Intent(context,CopyFix.class);
+            intent.putExtra("MSBcom",m.getComment());
+            intent.putExtra("MSBname",FileListe.get(which));
+            intent.putExtra("Location1",biLoc.get(0));
+            intent.putExtra("Location2",biLoc.get(1));
+            intent.putExtra("Which",0);
+            if (com.startName!=null) intent.putExtra("Name",com.startName);
+            if (startLoc!=null) intent.putExtra("Location",startLoc);
+            startActivityForResult(intent,activCopyFix);
+        } else {
+            com.startName=null;
+            launchMonitor();
+        }
+
+    }
+
+    ArrayList<String> FileListe=new ArrayList<>();
+    void selGPX(){
+        ArrayList<String> Liste=new ArrayList<>();
+        File f1=new File(com.pathMSBlog);
+        FilenameFilter meta=new filterMeta("MSB_\\d{4}+\\.txt");
+        if (f1.isDirectory()){
+            String s[] = f1.list(meta);
+            if (s.length>0){
+                Arrays.sort(s);
+                metaData m=new metaData();
+                for (int i = 0; i < s.length; i++) {
+                    String sName = s[i].replace(".txt", "");
+                    if (!m.extract(sName)) continue;
+                    File g = new File(m.getPathGpx());
+                    if (!g.exists()) continue;
+                    String line = sName + " / " + m.getDay() + " / " + m.getPlane() + " / " + m.getComment();
+                    Liste.add(line);
+                    FileListe.add(sName);
+                }
+            }
+        }
+        ar=Liste.toArray(new String[0]);
+        if (ar.length>0){
+            final AlertDialog.Builder build=new AlertDialog.Builder(this);
+            build.setTitle("Choose a flight for the GPX");
+            build.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    com.startName=null;
+                    launchMonitor();
+                }
+            })
+                    .setNegativeButton("Back", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            com.startName=null;
+                            launchMonitor();
+                        }
+                    })
+                    .setItems(ar, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startCopy(which);
+                        }
+                    });
+            build.show();
+        } else {
+            Toast toast=Toast.makeText(this,"No file in the directory!",
+                    Toast.LENGTH_LONG);
+            toast.show();
+            com.startName=null;
+            launchMonitor();
+        }
+    }
+
+    class filterMeta implements FilenameFilter {
+
+        private Pattern mask;
+
+        public filterMeta(String m) {
+            mask = Pattern.compile(m);
+        }
+
+        public boolean accept(File dir, String name) {
+            Matcher mat = mask.matcher(name);
+            return mat.matches();
+        }
+    }
+
+    class metaData {
+
+        String date;
+        String plane;
+        String comment;
+        String startName = null;
+        String MsbName;
+        String pathCsv;
+        String pathHtml;
+        String pathGpx;
+        String pathKml;
+        String pathTXT;
+        Calendar startTime = Calendar.getInstance();
+
+        public boolean extract(String name) {
+            pathTXT = com.pathMSBlog + "/" + name + ".txt";
+            pathHtml = com.pathMSBlog + "/" + name + ".html";
+            pathGpx = com.pathMSBlog + "/" + name + ".gpx";
+            pathKml = com.pathMSBlog + "/" + name + ".kml";
+            try {
+                BufferedReader f = new BufferedReader(new FileReader(pathTXT));
+                for (int i = 0; i < 3; i++) {
+                    String line = f.readLine();
+                    if (line.startsWith("Date: ")) {
+                        date = line.replaceFirst("Date: ", "");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        try {
+                            Date dd = sdf.parse(date, new ParsePosition(0));
+                            startTime.setTime(dd);
+                        } catch (Exception e) {
+                            startTime = Calendar.getInstance();
+                        }
+                    } else if (line.startsWith("Plane: ")) {
+                        plane = line.replaceFirst("Plane: ", "");
+                    } else if (line.startsWith("Comment: ")) {
+                        comment = line.replaceFirst("Comment: ", "");
+                    } else if (line.startsWith("StartName: ")) {
+                        startName = line.replace("StartName: ", "");
+                        startName.trim();
+                        if (startName.isEmpty()) startName = null;
+                    }
+                }
+            } catch (IOException e) {
+                return false;
+            }
+            return ((date != null) && (plane != null) && (comment != null));
+        }
+
+        public String getDay (){
+            Pattern pat=Pattern.compile("[ ]");
+            String fields[]=pat.split(date);
+            return fields[0];
+        }
+
+        public String getPlane (){
+            return plane;
+        }
+
+        public String getComment (){
+            return comment;
+        }
+
+        public String getPathGpx(){
+            return pathGpx;
+        }
     }
 }

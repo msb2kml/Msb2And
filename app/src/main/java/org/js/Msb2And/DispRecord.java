@@ -34,15 +34,15 @@ public class DispRecord {
     private FileWriter outMSBfile=null;
     private int nMeas=0;
     private RecordReading lastSensor=new RecordReading();
-    private Calendar startTime=null;
     private String plane="";
     private String comment="";
+    private String startName=null;
     private boolean named;
     private boolean[] minus=new boolean[16];
 
     public void setVar(Context context, WeakReference<Monitor> mActivity,
                        int from, String pathMSBfile, String pathMeta,
-                       String plane, String comment){
+                       String plane, String comment, String startName){
         this.contextMoni=context;
         Rx=context.getResources().getInteger(R.integer.Rx);
         Soufl=context.getResources().getInteger(R.integer.Soufl);
@@ -53,39 +53,52 @@ public class DispRecord {
         this.pathMeta=pathMeta;
         this.plane=plane;
         this.comment=comment;
+        this.startName=startName;
         onAir=(Button) mActivity.get().findViewById(R.id.onair);
         secText=(TextView) mActivity.get().findViewById(R.id.when);
         named=mActivity.get().named;
-        for (int i=0;i<16;i++){
-            if (named){
-                minus[i]=mActivity.get().names[i].matches("-");
-            } else minus[i]=false;
-        }
         return;
     }
 
     public void dispRecord(RecordReading fullSensor, long old){
+        ArrayList<CompReading>cr=null;
+        if (named)  mActivity.get().stDirect(fullSensor);
         SensorReading[] asmbl=new SensorReading[16];
-        ArrayList<SensorReading> objects=new ArrayList<SensorReading>();
-        if (startTime==null) startTime=Calendar.getInstance();
+        ArrayList<Object> ob=new ArrayList<>();
+        if (mActivity.get().startTime==null) mActivity.get().startTime=Calendar.getInstance();
         if (list==null){
             list=(ListView) mActivity.get().findViewById(R.id.list);
+            if (named){
+                cr=mActivity.get().cmplDirect(fullSensor);
+            }
+            for (int i=0;i<16;i++){
+                if (named){
+                    minus[i]=mActivity.get().names[i].matches("-");
+                } else minus[i]=false;
+            }
             for (int i=0; i<16; i++){
                 if (fullSensor.record[i]!=null && !minus[i]){
                     if (fullSensor.logTime>2) fullSensor.record[i].chkXtrm();
-                    objects.add((fullSensor.record[i]));
+                    ob.add((fullSensor.record[i]));
                 }
             }
-            mAdapter=new MyListAdapter(contextMoni,mActivity,objects);
+            if (named) {
+                if (cr!=null && !cr.isEmpty()) ob.addAll(cr);
+                mActivity.get().stCalc();
+            }
+            mAdapter=new MyListAdapter(contextMoni,mActivity,ob);
             list.setAdapter(mAdapter);
         } else {
             for (int i = 0; i < mAdapter.getCount(); i++) {
-                SensorReading sens = (SensorReading) mAdapter.getItem(i);
-                int addr = sens.addr;
-                if (sens.inTime<old) {
-                    sens.valid=false;
+                Object o=mAdapter.getItem(i);
+                if (o.getClass().getSimpleName().matches("SensorReading")) {
+                    SensorReading sens = (SensorReading) o;
+                    int addr = sens.addr;
+                    if (sens.inTime < old) {
+                        sens.valid = false;
+                    }
+                    asmbl[addr] = sens;
                 }
-                asmbl[addr] = sens;
             }
             for (int i = 0; i < 16; i++) {
                 if (fullSensor.record[i] != null) {
@@ -94,11 +107,15 @@ public class DispRecord {
                 }
                 if (asmbl[i] != null && !minus[i]) {
                     if (fullSensor.logTime>2) asmbl[i].chkXtrm();
-                    objects.add(asmbl[i]);
+                    ob.add(asmbl[i]);
                 }
             }
             mAdapter.getSensor().clear();
-            mAdapter.getSensor().addAll(objects);
+            mAdapter.getSensor().addAll(ob);
+            if (named){
+                cr=mActivity.get().stCalc();
+                if (cr!=null && !cr.isEmpty()) mAdapter.getSensor().addAll(cr);
+            }
             mAdapter.notifyDataSetChanged();
         }
         lastSensor.cp(fullSensor);
@@ -158,9 +175,9 @@ public class DispRecord {
         if (outMSBfile!=null){
             try {
                 outMSBfile.close();
-                if (pathMeta!=null && startTime!=null && lastSensor!=null){
+                if (pathMeta!=null && mActivity.get().startTime!=null && lastSensor!=null){
                     SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    mActivity.get().startDate=sdf.format(startTime.getTime());
+                    mActivity.get().startDate=sdf.format(mActivity.get().startTime.getTime());
                     mActivity.get().nMeas=nMeas;
                     mActivity.get().sDuration=lastSensor.logTime/1000;
                     return false;
@@ -185,6 +202,7 @@ public class DispRecord {
             outMeta.write("Date: "+mActivity.get().startDate+"\n");
             outMeta.write("Plane: "+mActivity.get().plane+"\n");
             outMeta.write("Comment: "+mActivity.get().comment+"\n");
+            if (startName!=null) outMeta.write("StartName: "+startName+"\n");
             line="Time: 0.0000;"+lastSensor.prTime()+"\n";
             outMeta.write(line);
             for (int i=0;i<16;i++){

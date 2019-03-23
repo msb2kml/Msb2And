@@ -34,6 +34,7 @@ public class comSoufl {
     private static Long logTime;
     private static SensorReading[] allSensor;
     private static Long lastSent;
+    private static Long firstRcv=null;
     public static DispRecord disp;
     private Timer myTimer;
     private boolean initialized;
@@ -152,7 +153,10 @@ public class comSoufl {
         if (logTime==null) logTime=tim;
         if (Math.abs(sensor.value)<16000) sensor.valid=true;
         sensor.inTime=tim;
-        if (allSensor[addr]!=null){
+        if (firstRcv==null) firstRcv=now;
+        if (lastSent==null) lastSent=now;
+//        if ((now-lastSent)>500){
+        if ((now-firstRcv)>2000 && allSensor[addr]!=null){
             if (logTime==null) logTime=now;
             if (lastSent==null) lastSent=now;
             RecordReading fullSensor=new RecordReading();

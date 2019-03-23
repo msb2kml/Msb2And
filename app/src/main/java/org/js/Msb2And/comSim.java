@@ -102,6 +102,7 @@ public class comSim {
                 fullSensor.record[i-2]=mkSR(i-2,v);
             }
         }
+        int j=fullSensor.record.length;
         return  fullSensor;
     }
 
@@ -149,7 +150,7 @@ public class comSim {
             else if (fields[i].contains("t/min")) addrClass[i-2]=5;
             else if (fields[i].contains(deg.toString()+"C")) addrClass[i-2]=6;
             else if (fields[i].contains(deg.toString())) addrClass[i-2]=7;
-            else if (fields[i].contains("%LQI")) addrClass[i-2]=10;
+            else if (fields[i].contains("% LQI")) addrClass[i-2]=10;
             else if (fields[i].contains("%")) addrClass[i-2]=9;
             else if (fields[i].contains("mAh")) addrClass[i-2]=11;
             else if (fields[i].contains("A")) addrClass[i-2]=2;

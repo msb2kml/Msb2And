@@ -3,6 +3,9 @@
     package="org.js.Msb2And">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.location.gps" />
 
     <application
         android:allowBackup="true"
@@ -30,13 +33,20 @@
 
         <activity
             android:name=".Monitor"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Storage"
             android:label="@string/title_activity_storage"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".Selector"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Selector" />
+        <activity
+            android:name=".CopyFix"
+            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".GetFix"
+            android:windowSoftInputMode="stateHidden"/>
+        <activity android:name=".HandFix"
+            android:windowSoftInputMode="stateHidden"/>
     </application>
 
 </manifest>

@@ -3,7 +3,9 @@ package org.js.Msb2And;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
@@ -19,8 +21,12 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 
@@ -44,12 +50,26 @@ public class Monitor extends AppCompatActivity {
     public String pathAddr;
     public String pathMSBfile=null;
     public String pathMeta=null;
+    public String pathStartGPS;
+    public String startName=null;
     public String startDate="";
+    public Calendar startTime=null;
     public int nMeas=0;
     public long sDuration=0;
     public String plane;
     public String comment;
     public String[] names=new String[16];
+    boolean useDist=false;
+    Location startLoc;
+    Location prevLoca=null;
+    Haversine haver;
+    ArrayList<Float> totDist=new ArrayList<Float>();
+    ArrayList <Float> fData=new ArrayList<Float>();
+    Integer varTime=null;
+    ArrayList <Float> compData=new ArrayList<Float>();
+    ArrayList<tool> compTool=new ArrayList<>();
+    ArrayList<String> compHead=new ArrayList<>();
+    ArrayList<CompReading> listComp=new ArrayList<>();
 
     public static WeakReference<Monitor> myAct;
 
@@ -70,28 +90,17 @@ public class Monitor extends AppCompatActivity {
         plane=intent.getStringExtra("plane");
         comment=intent.getStringExtra("comment");
         testPath=intent.getStringExtra("testPath");
+        startName=intent.getStringExtra("startName");
+        startLoc=intent.getParcelableExtra("Location");
         if (named){
-            pathAddr=intent.getStringExtra("pathAddr");
-            File addr=new File(pathAddr);
-            try {
-                BufferedReader f=new BufferedReader(new FileReader(addr));
-                String line="";
-                while (line!=null){
-                    line=f.readLine();
-                    if (line==null) continue;
-                    if (line.startsWith("*")) continue;
-                    String[] fields=line.split(";");
-                    if (fields==null || fields.length<2) continue;
-                    if (fields[0].matches(" A:[0-9]{2}")){
-                        String sub=fields[0].substring(3);
-                        int ind=Integer.valueOf(sub);
-                        if (ind>=0 && ind<16) names[ind]=fields[1].trim();
-                    }
-                }
-                f.close();
-            } catch (Exception e){
-                named=false;
+            for (int i=0;i<16;i++){
+                fData.add(0.0f);
             }
+            pathAddr=intent.getStringExtra("pathAddr");
+            pathStartGPS=intent.getStringExtra("pathStartGPS");
+            if (!readAddr(pathAddr)) named=false;
+            varTime=16;
+            fData.add(0.0f);
         }
         final Button bStart=(Button) findViewById(R.id.start);
         secText=(TextView) findViewById(R.id.when);
@@ -134,7 +143,7 @@ public class Monitor extends AppCompatActivity {
                     Started=true;
                     disp=new DispRecord();
                     disp.setVar(Monitor.this,myAct,from,pathMSBfile,pathMeta,
-                            plane,comment);
+                            plane,comment,startName);
 //                    disp.dispRecord(getRandomReading(),System.currentTimeMillis());
                     mHandler=new MyHandler(Monitor.this);
                     if (pathMSBfile==null){
@@ -156,6 +165,49 @@ public class Monitor extends AppCompatActivity {
                 }
             }
         });
+    }
+
+/*      For testing
+    FileWriter outGpx=null;
+    gpxGen g=new gpxGen();
+*/
+
+    Exception addPoint(Location loc){
+        Float ft=fData.get(varTime)*1000.0f;
+        Long cT=ft.longValue();
+        cT+=startTime.getTimeInMillis();
+        loc.setTime(cT);
+        Double Lat=loc.getLatitude();
+        Double Lon=loc.getLongitude();
+        Double Alt=loc.getAltitude();
+        if (prevLoca!=null && (Lat.compareTo(prevLoca.getLatitude())==0) &&
+                (Lon.compareTo(prevLoca.getLongitude())==0) &&
+                (Alt.compareTo(prevLoca.getAltitude())==0)) return null;
+        if (useDist){
+            if (prevLoca!=null){
+                Double Dist=haver.lHaversine(prevLoca,loc)+totDist.get(0);
+                totDist.set(0,Dist.floatValue());
+            }
+        }
+        if (prevLoca==null) prevLoca=new Location("");
+        prevLoca.set(loc);
+/*   For testing
+        if (pathMSBfile!=null) {
+            try {
+                if (outGpx == null) {
+                    String exPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+                    String pathMSBlog = exPath + "/" + context.getString(R.string.MSBlog);
+                    String pathGpx = pathMSBlog + "/" + "xxxx.gpx";
+                    outGpx=new FileWriter(pathGpx);
+                    g.beginGpx(outGpx,"xxxx");
+                }
+                g.pointGpx(loc);
+            } catch (Exception e) {
+                return e;
+            }
+        }
+*/
+        return null;
     }
 
     public void skipChoice(){
@@ -185,6 +237,16 @@ public class Monitor extends AppCompatActivity {
     }
     
     public void termin(){
+/*   For testing
+        if (outGpx!=null){
+            try {
+                g.tailGpx();
+                outGpx.close();
+            } catch (Exception e){
+
+            }
+        }
+*/
         if (Rx != null) Rx.close();
         if (Souf != null) Souf.close();
         if (Sim != null) Sim.close();
@@ -202,6 +264,7 @@ public class Monitor extends AppCompatActivity {
             lastIntent.putExtra("pathMeta",pathMeta);
             lastIntent.putExtra("plane",plane);
             lastIntent.putExtra("comment",comment);
+            if (startName!=null) lastIntent.putExtra("startName",startName);
             startActivityForResult(lastIntent,1);
         }
     }
@@ -220,6 +283,7 @@ public class Monitor extends AppCompatActivity {
         setResult(RESULT_OK, intent);
         intent.putExtra("plane",plane);
         intent.putExtra("comment",comment);
+        if (startName!=null) intent.putExtra("startName",startName);
         finish();
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                finishAndRemoveTask();
@@ -261,7 +325,7 @@ public class Monitor extends AppCompatActivity {
             }
         }
     }
-
+/*
     private RecordReading getRandomReading(){
         RecordReading rec=new RecordReading();
         Random random=new Random();
@@ -278,6 +342,172 @@ public class Monitor extends AppCompatActivity {
         Integer t=random.nextInt(1000);
         rec.logTime=t.longValue();
         return rec;
+    }
+*/
+    private class triplet{
+        String addr=null;
+        String subst=null;
+        Character var=null;
+    }
+
+    ArrayList<triplet> translate=new ArrayList<>();
+
+// AddrSens to triplet
+    boolean readAddr(String pathAddr){
+        if (pathAddr==null) return false;
+        File addr=new File(pathAddr);
+        if (! addr.exists()) return false;
+        int n=0;
+        try {
+            BufferedReader f = new BufferedReader(new FileReader(addr));
+            String line="";
+            while (line!=null){
+                line=f.readLine();
+                if (line==null) continue;
+                if (line.startsWith("*")) continue;
+                String[] fields = line.split(";");
+                if (fields==null || fields.length<2) continue;
+                triplet t=new triplet();
+                t.addr=fields[0];
+                t.subst=fields[1];
+                if (fields.length>2){
+                    String sign=fields[2].trim();
+                    if (!sign.isEmpty()) t.var=sign.charAt(0);
+                }
+                translate.add(t);
+            }
+            f.close();
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
+    }
+
+    public class Var{
+        Character id=null;
+        Object thing=null;
+        Integer index=null;
+    }
+
+    ArrayList<Var> variables=new ArrayList<>();
+
+    boolean setVar(Character c, Object O, Integer ind){
+        if (variables!=null) {
+            for (Var v : variables) if (v.id == c) return false;
+        }
+        Var v=new Var();
+        v.id=c;
+        v.thing=O;
+        v.index=ind;
+        variables.add(v);
+        return true;
+    }
+
+    public Var getVar(Character c){
+        if (variables==null) return null;
+        for (Var v : variables) {
+            if (v.id.equals(c)) return v;
+        }
+        if (c.equals('#') && startLoc!=null){
+            useDist=true;
+            totDist.add(0f);
+            if (!setVar(c,(Object)totDist,0)) return null;
+            return  getVar(c);
+        }
+        return null;
+    }
+
+    public boolean delVar(char c){
+        if (variables==null) return false;
+        for (Var v : variables) if (v.id.equals(c)){
+            variables.remove(v);
+            return true;
+        }
+        return false;
+    }
+
+    public void stDirect(RecordReading fullSensor){
+        for (int i = 0; i < 16; i++) {
+                if (fullSensor.record[i] != null)
+                    fData.set(i, fullSensor.record[i].fVal());
+            }
+        if (varTime!=null) fData.set(varTime,fullSensor.fTime());
+    }
+
+    public ArrayList<CompReading> stCalc(){
+        int ind=varTime+1;
+        int iList=0;
+        for (int i=0;i<compTool.size();i++){
+            tool t=compTool.get(i);
+            if (t!=null){
+                fData.set(ind+i,t.compute());
+                if (!compHead.get(i).matches("-")) {
+                    listComp.get(iList).setValue(fData.get(ind+i));
+                    iList++;
+                }
+            }
+        }
+        return listComp;
+    }
+
+    public ArrayList<CompReading> cmplDirect(RecordReading fullSensor){
+        if (translate.isEmpty()) return null;
+        haver=new Haversine();
+// var for direct data
+        for (int i=0; i<16; i++){
+            String ad=String.format(" A:%02d",i);
+            names[i]=ad;
+            if (fullSensor.record[i]==null) continue;
+            for (triplet tr : translate){
+                if (ad.matches(tr.addr)){
+                    if (tr.subst!=null) names[i]=tr.subst;
+                    if (tr.var!=null) setVar(tr.var,(Object)fData,i);
+                    break;
+                }
+            }
+        }
+// var for functions
+        for (triplet tr : translate){
+            if (tr.addr.startsWith("=")){
+                fData.add(0.0f);
+                if (tr.var!=null) setVar(tr.var,(Object)fData,fData.size()-1);
+            } else if (tr.addr.startsWith("Time") && tr.var!=null){
+                setVar(tr.var,(Object)fData,varTime);
+            }
+        }
+// identify functions
+        tb t=new tb();
+        for (triplet tr : translate){
+            if (tr.addr.startsWith("=")){
+                tool x=t.toolBox(this,tr.addr,tr.var);
+                compTool.add(x);
+                compHead.add(tr.subst);
+            }
+        }
+// check for availibilty of var
+        boolean ok=(compTool.size()<1);
+        while (!ok){
+            ok=true;
+            for (int it=0;it<compTool.size();it++){
+                if (compTool.get(it)!=null){
+                    if (!compTool.get(it).checkMore()){
+                        compTool.set(it,null);
+                        ok=false;
+                    }
+                }
+            }
+        }
+// compose list
+        for (int i=0;i<compTool.size();i++){
+            if (compTool.get(i)!=null && !compHead.get(i).matches("-")){
+                CompReading cr=new CompReading();
+                cr.heading=compHead.get(i);
+                cr.func=compTool.get(i).getClass().getSimpleName();
+                listComp.add(cr);
+            }
+        }
+        return listComp;
     }
 
 }

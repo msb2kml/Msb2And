@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="8dp"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    >
+    android:paddingBottom="8dp"
+    android:saveEnabled="true">
 
     <TextView
         android:id="@+id/number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:text="xx" />
 
     <TextView
         android:id="@+id/value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:textSize="24sp"
-        android:text="123456" />
+        android:layout_centerHorizontal="true"
+        android:text="123456"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/unit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
         android:text="m/s" />
 
     <TextView
         android:id="@+id/minim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_below="@id/value"
+        android:layout_alignParentLeft="true"
         android:text="123456" />
 
     <TextView
         android:id="@+id/maxim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_below="@id/value"
+        android:layout_alignParentRight="true"
         android:text="123456" />
 </RelativeLayout>

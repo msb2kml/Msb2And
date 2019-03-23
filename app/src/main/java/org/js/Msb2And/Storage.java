@@ -14,6 +14,7 @@ public class Storage extends AppCompatActivity {
 
     Intent intent;
     public String startTime;
+    public String startName;
     public Long Duration;
     public Integer nbData;
     public String pathData;
@@ -21,6 +22,7 @@ public class Storage extends AppCompatActivity {
     public String plane;
     public String comment;
     public TextView viewStart;
+    public TextView viewLoc;
     public TextView viewDuration;
     public TextView viewNb;
     public TextView viewPathData;
@@ -36,6 +38,7 @@ public class Storage extends AppCompatActivity {
         setContentView(R.layout.activity_storage);
         intent=getIntent();
         startTime=intent.getStringExtra("startTime");
+        startName=intent.getStringExtra("startName");
         Duration=intent.getLongExtra("Duration",0);
         nbData=intent.getIntExtra("nbData",0);
         pathData=intent.getStringExtra("pathData");
@@ -43,6 +46,7 @@ public class Storage extends AppCompatActivity {
         plane=intent.getStringExtra("plane");
         comment=intent.getStringExtra("comment");
         viewStart=(TextView) findViewById(R.id.startTime);
+        viewLoc=(TextView) findViewById(R.id.startLoc);
         viewDuration=(TextView) findViewById(R.id.duration);
         viewNb=(TextView) findViewById(R.id.nbData);
         viewPathData=(TextView) findViewById(R.id.dataFile);
@@ -52,6 +56,8 @@ public class Storage extends AppCompatActivity {
         bForget=(Button) findViewById(R.id.forget);
         bSave=(Button) findViewById(R.id.record);
         viewStart.setText(startTime);
+        if (startName==null) viewLoc.setText("");
+        else viewLoc.setText(startName);
         Float minutes= Float.valueOf(Duration)/60;
         viewDuration.setText(String.format(Locale.US,"%.1f",minutes));
         viewNb.setText(String.valueOf(nbData));

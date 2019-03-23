@@ -21,6 +21,11 @@ public class RecordReading {
         return String.format(Locale.GERMAN,"%06.4f",ft);
     }
 
+    public Float fTime(){
+        Float f=Float.valueOf(logTime)/1000.0f;
+        return f;
+    }
+
     public void cp(RecordReading other){
         if (other==null) return;
         logTime=other.logTime;

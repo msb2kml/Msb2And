@@ -69,7 +69,7 @@ public class SensorReading {
             case 13:
                 return "km";
             default:
-                return "?";
+                return "?"+String.valueOf(v_class);
         }
     }
 
@@ -110,7 +110,33 @@ public class SensorReading {
             case 12:
                  return String.valueOf(x);
              default:
-                 return "?";
+                 return "?"+String.valueOf(x);
          }
+     }
+
+     public Float fVal(){
+        Double x=Double.valueOf(value);
+        switch (v_class){
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 6:
+            case 7:
+            case 13:
+                x=x/10.0;
+                break;
+            case 5:
+                x=x*100.0;
+                break;
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            default:
+                break;
+        }
+        return x.floatValue();
      }
 }
