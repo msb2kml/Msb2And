@@ -3,6 +3,9 @@ package org.js.Msb2And;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Environment;
@@ -27,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -70,6 +74,11 @@ public class Monitor extends AppCompatActivity {
     ArrayList<tool> compTool=new ArrayList<>();
     ArrayList<String> compHead=new ArrayList<>();
     ArrayList<CompReading> listComp=new ArrayList<>();
+    Intent intentMap=null;
+    Boolean runningMap=false;
+    Integer reqCdStore=1;
+    Integer objPosMap=null;
+    String bubbleMap=null;
 
     public static WeakReference<Monitor> myAct;
 
@@ -167,6 +176,7 @@ public class Monitor extends AppCompatActivity {
         });
     }
 
+
 /*      For testing
     FileWriter outGpx=null;
     gpxGen g=new gpxGen();
@@ -207,6 +217,13 @@ public class Monitor extends AppCompatActivity {
             }
         }
 */
+        if (runningMap) {
+            Intent nt = new Intent();
+            nt.setAction("org.js.LOC");
+            nt.putExtra("LOC", prevLoca);
+            if (bubbleMap!=null) nt.putExtra("BUBBLE",bubbleMap);
+            sendBroadcast(nt);
+        }
         return null;
     }
 
@@ -265,29 +282,31 @@ public class Monitor extends AppCompatActivity {
             lastIntent.putExtra("plane",plane);
             lastIntent.putExtra("comment",comment);
             if (startName!=null) lastIntent.putExtra("startName",startName);
-            startActivityForResult(lastIntent,1);
+            startActivityForResult(lastIntent,reqCdStore);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        switch (resultCode){
-            case RESULT_CANCELED:
-                disp.delData();
-                break;
-            case RESULT_OK:
-                plane=data.getStringExtra("plane");
-                comment=data.getStringExtra("comment");
-                disp.recMeta(plane,comment);
-        }
-        setResult(RESULT_OK, intent);
-        intent.putExtra("plane",plane);
-        intent.putExtra("comment",comment);
-        if (startName!=null) intent.putExtra("startName",startName);
-        finish();
+        if (requestCode==reqCdStore) {
+            switch (resultCode) {
+                case RESULT_CANCELED:
+                    disp.delData();
+                    break;
+                case RESULT_OK:
+                    plane = data.getStringExtra("plane");
+                    comment = data.getStringExtra("comment");
+                    disp.recMeta(plane, comment);
+            }
+            intent.putExtra("plane", plane);
+            intent.putExtra("comment", comment);
+            if (startName != null) intent.putExtra("startName", startName);
+            setResult(RESULT_OK, intent);
+            finish();
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                finishAndRemoveTask();
 //            } else finish();
+        }
         super.onActivityResult(requestCode,resultCode,data);
     }
 
@@ -507,7 +526,46 @@ public class Monitor extends AppCompatActivity {
                 listComp.add(cr);
             }
         }
+        checkMap();
         return listComp;
     }
+
+    public void checkMap(){
+        if (startName==null) return;
+        PackageManager Pm=getPackageManager();
+        List<PackageInfo> allPack=Pm.getInstalledPackages(0);
+        for (PackageInfo AI :allPack) {
+            String zz=AI.packageName;
+            if (zz.matches("org.js.Msb2Map")){
+                intentMap=Pm.getLaunchIntentForPackage(zz);
+                break;
+            }
+        }
+        return;
+    }
+
+    public void runMap(Integer position){
+        if (intentMap==null) return;
+        objPosMap=position;
+        Intent nt=(Intent) intentMap.clone();
+        nt.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        nt.putExtra("CALLER","Msb2And");
+        nt.putExtra("CENTER",startLoc);
+        runningMap=true;
+        startActivity(nt);
+    }
+
+    public Location nameToLoc(String pylone){
+        Location loc=null;
+        if (pathStartGPS==null) return null;
+        StartGPS sGPS=new StartGPS(pathStartGPS);
+        Map<String,Location> startPoints=sGPS.readSG();
+        if (startPoints.isEmpty()) return null;
+        if (!startPoints.containsKey(pylone)) return null;
+        loc=startPoints.get(pylone);
+        return loc;
+    }
+
+
 
 }

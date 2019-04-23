@@ -104,6 +104,11 @@ public class MainActivity extends AppCompatActivity {
         com.checkStorage(mAct,context);
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+    }
+
     public void start1(){
         final String startName=com.startName;
         final String pathStartGPS=com.pathStartGPS;

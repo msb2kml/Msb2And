@@ -250,6 +250,25 @@ See the screenshot [Screenshot_Slope](Screenshots/Screenshot_Slope.jpg).
 This extract the longitude from the current GPS location;  
 See the screenshot [Screenshot_Slope](Screenshots/Screenshot_Slope.jpg).
 
+### Distance to a turn point
+
+   =DIST,Turnpoint1,$G,Turnpoint 1
+
++ "Turnpoint1" stands for a location named in the file StartGPS.gpx
++ $G is the result of the reconstruction of the GPS location.
+ It is not used otherwise than to be assured that the reconstruction
+ has been provided.
+
+This compute the distance in meters (rounded) from the plane
+to the location of "Turnpoint1".  
+Of course, this function could be invoked for several locations.  
+The location of turnpoints could be entered in the file
+StartGPS.gpx with the help of the application
+[Msb2Kml](https://github.com/msb2kml/Msb2Kml/blob/RemoteGPS/Documents/RemoteGPS.md).
+
+
+
+
 
 
 ### Note

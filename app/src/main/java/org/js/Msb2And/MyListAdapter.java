@@ -30,21 +30,17 @@ public class MyListAdapter extends BaseAdapter {
 
     public MyListAdapter(final Context context, final WeakReference<Monitor> mActivity,
                          final List<Object> mObject){
-//                         final List<SensorReading> mSensor){
         this.mContext=context;
-//        this.mSensor=mSensor;
         this.mObject=mObject;
         this.mActivity=mActivity;
         named=mActivity.get().named;
     }
 
-//    public List<SensorReading> getSensor(){ return mSensor; }
     public List<Object> getSensor(){ return mObject;}
 
     @Override
     public int getCount(){
         if (mObject!=null) return mObject.size();
-//        if (mSensor!= null) return mSensor.size();
         return 0;
     }
 
@@ -55,7 +51,6 @@ public class MyListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i){ return mObject !=null ? mObject.get(i) : null; }
-//    public Object getItem(int i){ return mSensor != null ? mSensor.get(i) : null; }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
@@ -86,8 +81,10 @@ public class MyListAdapter extends BaseAdapter {
                 viewHolder.number.setText(nam);
                 if (obj.alarm) viewHolder.number.setTextColor(Color.RED);
                 else viewHolder.number.setTextColor(Color.BLACK);
-                if (obj.valid) viewHolder.value.setText(obj.print());
-                else viewHolder.value.setText("( " + obj.print() + " )");
+                String measure;
+                if (obj.valid) measure=obj.print();
+                else measure="( " + obj.print() + " )";
+                viewHolder.value.setText(measure);
                 String head = obj.heading().replace(deg.toString(), "°");
                 viewHolder.unit.setText(head);
                 viewHolder.minim.setText(obj.print_min());
@@ -99,6 +96,8 @@ public class MyListAdapter extends BaseAdapter {
                 nam=c.heading;
                 viewHolder.number.setText(nam);
                 viewHolder.number.setTextColor(Color.BLACK);
+                if (mActivity.get().objPosMap!=null &&
+                        mActivity.get().objPosMap==position) mActivity.get().bubbleMap=c.print();
                 viewHolder.value.setText(c.print());
                 viewHolder.unit.setText(c.func);
                 viewHolder.maxim.setText(c.printMax());
@@ -116,4 +115,5 @@ public class MyListAdapter extends BaseAdapter {
         TextView minim;
         TextView maxim;
     }
+
 }

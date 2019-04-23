@@ -861,6 +861,53 @@ class LON extends tool{
     }
 }
 
+class DIST extends tool{
+
+    String pylone=null;
+    Location loc=null;
+    Location currentLoc=null;
+    Haversine haver=new Haversine();
+
+    public float compute() {
+        currentLoc=mo.prevLoca;
+        Double Dist=haver.lHaversine(currentLoc,loc);
+        Long ist=Math.round(Dist*1000.0);
+        Float dist=ist.floatValue();
+        return dist;
+    }
+
+    public boolean check(Monitor f, String[] fields, Character l) {
+        mo=f;
+        if (l!=null) label=l;
+        if (fields.length<3 || mo.startLoc==null){
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        letter=new char[1];
+        pylone=fields[1];
+        if (fields[2].length()<2 || !fields[2].startsWith("$")){
+            if (label !=null) mo.delVar(label);
+            return false;
+        }
+        letter[0]=fields[2].charAt(1);
+        loc=mo.nameToLoc(pylone);
+        if (loc==null) {
+            if (label !=null) mo.delVar(label);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkMore() {
+        Monitor.Var v=mo.getVar(letter[0]);
+        if (v==null){
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        return true;
+    }
+}
+
 class tb{
 
     public tool toolBox(Monitor f, String expr, Character l){
@@ -930,9 +977,13 @@ class tb{
             tool t=new LAT();
             if (t.check(f,fields,l)) return t;
             return null;
-        } else if (fields[0].matches("=LON")){
-            tool t=new LON();
-            if (t.check(f,fields,l)) return t;
+        } else if (fields[0].matches("=LON")) {
+            tool t = new LON();
+            if (t.check(f, fields, l)) return t;
+            return null;
+        } else if (fields[0].matches("=DIST")){
+            tool t=new DIST();
+            if (t.check(f, fields,l)) return t;
             return null;
         } else{
             if (l!=null) f.delVar(l);

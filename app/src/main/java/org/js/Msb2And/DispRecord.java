@@ -1,9 +1,12 @@
 package org.js.Msb2And;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -88,6 +91,14 @@ public class DispRecord {
             }
             mAdapter=new MyListAdapter(contextMoni,mActivity,ob);
             list.setAdapter(mAdapter);
+            if (mActivity.get().intentMap!=null){
+                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        mActivity.get().runMap(position);
+                    }
+                });
+            }
         } else {
             for (int i = 0; i < mAdapter.getCount(); i++) {
                 Object o=mAdapter.getItem(i);
@@ -119,6 +130,7 @@ public class DispRecord {
             mAdapter.notifyDataSetChanged();
         }
         lastSensor.cp(fullSensor);
+        if (mActivity.get().runningMap) setBubble(mActivity.get().objPosMap);
         try {
             if (nMeas == 0 && pathMSBfile!=null) {
                 outMSBfile = new FileWriter(pathMSBfile);
@@ -218,6 +230,26 @@ public class DispRecord {
         } catch (IOException e){
             return;
         }
+    }
+
+    public void setBubble( Integer position){
+        String nam="";
+        String measure="";
+        Object o=mAdapter.getItem(position);
+        if (o==null) return;
+        if (o.getClass().getSimpleName().matches("SensorReading")){
+            SensorReading obj=(SensorReading) o;
+            if (named && mActivity.get().names[obj.addr] !=null){
+                nam=String.valueOf(obj.addr)+"/"+mActivity.get().names[obj.addr];
+            } else nam=String.valueOf(obj.addr);
+            if (obj.valid) measure=obj.print();
+            else measure="("+obj.print()+")";
+        } else if (o.getClass().getSimpleName().matches("CompReading")){
+            CompReading c=(CompReading) o;
+            nam=c.heading;
+            measure=c.print();
+        }
+        mActivity.get().bubbleMap=nam+": "+measure;
     }
 
 

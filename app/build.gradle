@@ -6,8 +6,8 @@ android {
         applicationId "org.js.Msb2And"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 10
-        versionName '1.0 Functions + Remote GPS'
+        versionCode 12
+        versionName '1.2 =DIST function and Map'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

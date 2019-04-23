@@ -4,7 +4,7 @@ data collected by the sensors on the MSB telemetry bus.
 It is able to use this data to compute and display secondary parameters.  
 Among theses capabilities there is the possibility to compute
 the geographic position of the plane from the telemetry
-data sent by the GPS module.  
+data sent by the GPS module and to display it on a map.  
 This application is probably more useful to a coach than
 directly to the pilot.
 
