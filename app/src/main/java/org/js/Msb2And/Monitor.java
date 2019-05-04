@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Environment;
@@ -29,6 +30,7 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -79,6 +81,16 @@ public class Monitor extends AppCompatActivity {
     Integer reqCdStore=1;
     Integer objPosMap=null;
     String bubbleMap=null;
+    Var colorVar=null;
+    Integer[] lineColor={ Color.rgb(0xFF,0x00,0x00),
+                          Color.rgb(0xDA,0x00,0x24),
+                          Color.rgb(0xB6,0x00,0x48),
+                          Color.rgb(0x91,0x00,0x6D),
+                          Color.rgb(0x6D,0x00,0x91),
+                          Color.rgb(0x48,0x00,0xB6),
+                          Color.rgb(0x24,0x00,0xDA),
+                          Color.rgb(0x00,0x00,0xFF)};
+    int nColor=lineColor.length;
 
     public static WeakReference<Monitor> myAct;
 
@@ -222,6 +234,14 @@ public class Monitor extends AppCompatActivity {
             nt.setAction("org.js.LOC");
             nt.putExtra("LOC", prevLoca);
             if (bubbleMap!=null) nt.putExtra("BUBBLE",bubbleMap);
+            if (colorVar!=null){
+                ArrayList<Float> zz=(ArrayList<Float>) colorVar.thing;
+                Float percent=zz.get(colorVar.index)/100f;
+                int v=Math.round(percent*nColor);
+                v=Math.max(1,Math.min(nColor,v))-1;
+                int color=lineColor[v];
+                nt.putExtra("COLOR",color);
+            }
             sendBroadcast(nt);
         }
         return null;
@@ -527,6 +547,7 @@ public class Monitor extends AppCompatActivity {
             }
         }
         checkMap();
+        colorVar=getVar('%');
         return listComp;
     }
 

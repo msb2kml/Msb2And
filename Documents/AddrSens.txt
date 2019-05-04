@@ -39,7 +39,7 @@ Time;Temps;                 t
 * Traveled distance
 =TRV,$K,$#;Km;              L
 * Colorisation
-=COL,-0.35,0.35,$B;-;       %
+=COL,-1.0,1.0,$b;-;         %
 * Climbing
 =CUMP,$d,$U;Deniv+;         U
 =CUMN,$d,$u;Deniv-;         u

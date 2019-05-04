@@ -16,7 +16,9 @@ direct or computed, launch the **Msb2Map** application.
 **Msb2And** is still running in the background.  
 It is using an Android mechanism of internal broadcasting to
 send the geographic position of the plane and the value of the
-parameter that has been taped.
+parameter that has been taped.  
+The color defined by the variable "%" in AddrSens.txt is
+sent along the position to colorize the tail.
 
 **Msb2Map** receives this data and display it while running.  
 If it is terminated, **Msb2And** come back to the foreground and another

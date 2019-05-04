@@ -45,11 +45,27 @@ computed by the program if it is used: "\#".
 It is the accumulated traveled distance (km) between points of
 the GPS track, if the track is reconstructed.
 
+The variable named "%" could be defined and it has a special
+signification. It should be in the range 0.0 to 100.0.  
+There is a relation between the value of this variable
+and a color: from RED (0%) to BLUE (100%) in 8 levels.  
+The color is used for the segments of the tail on the map.
 
 
 ### List of functions
 
 Each function is presented as it could be used on a line of the file.
+
+#### Colorization of tail on the map
+
+    =COL,-1.0,1.0,$b;-;     %
+
++ $b is the vario.
+
+The range of values (-1.0 - 1.0) of the variable is converted
+to the range (0.0 - 100.0). This is attributed the name "%"
+to be used for colorization.  
+Instead of vario, it could be height, speed, ...
 
 #### Battery internal resistance
 

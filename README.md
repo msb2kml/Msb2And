@@ -29,7 +29,10 @@ This Android/Java application could be installed if you have
 checked that applications from other sources than Google Play
 could be installed.  
 It should work on Android versions from Jelly Bean (4.1) to
-Oreo (8.0).
+Oreo (8.0).  
+It could be compiled from the sources in this repository or
+downloaded from the [Releases](https://github.com/msb2kml/Msb2And/releases)
+pages.
 
 # Library
 This application make use of the library

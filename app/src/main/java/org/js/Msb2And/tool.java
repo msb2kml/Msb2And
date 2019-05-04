@@ -908,6 +908,69 @@ class DIST extends tool{
     }
 }
 
+class COL extends tool {
+
+    Float offset=new Float(0f);
+    Float factor=new Float(1f);
+
+    public float compute() {
+        float vario=((ArrayList<Float>)args[0].thing).get(args[0].index);
+        return (vario-offset)*factor;
+    }
+
+    public boolean check(Monitor f, String[] fields, Character l) {
+        mo=f;
+        if (fields.length<4) return false;
+        if (l != null) label = l;
+        if (fields.length<4) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        Float min=new Float(0f);
+        Float max=new Float(100f);
+        try { min=min.parseFloat(fields[1]);
+        } catch (NumberFormatException e){
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        try {
+            max = max.parseFloat(fields[2]);
+        } catch (NumberFormatException e) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        if (min.compareTo(max)>=0) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        letter=new char[1];
+        args=new Monitor.Var[1];
+        if (fields[3].length()<2 || !fields[3].startsWith("$")) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        letter[0]=fields[3].charAt(1);
+        args[0]=mo.getVar(letter[0]);
+        if (args[0]==null) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        offset=min;
+        factor=100f/(max-min);
+        return true;
+    }
+
+    public boolean checkMore(){
+        Monitor.Var v;
+        v=mo.getVar(letter[0]);
+        if (v==null){
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        return true;
+    }
+}
+
 class tb{
 
     public tool toolBox(Monitor f, String expr, Character l){
@@ -983,6 +1046,10 @@ class tb{
             return null;
         } else if (fields[0].matches("=DIST")){
             tool t=new DIST();
+            if (t.check(f, fields,l)) return t;
+            return null;
+        } else if (fields[0].matches("=COL")){
+            tool t=new COL();
             if (t.check(f, fields,l)) return t;
             return null;
         } else{
