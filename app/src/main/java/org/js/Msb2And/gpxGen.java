@@ -22,7 +22,7 @@ public class gpxGen {
             outGpx.write("   xmlns=\"http://www.topografix.com/GPX/1/0\"\n");
             outGpx.write("   xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0");
             outGpx.write("http://www.topografix.com/GPX/1/0/gpx.xsd\">\n");
-            outGpx.write(String.format(Locale.US,"<trk><name>%s</name><trkseg>\n",name));
+            outGpx.write(String.format(Locale.ENGLISH,"<trk><name>%s</name><trkseg>\n",name));
             return true;
         } catch (IOException e) {
             return false;

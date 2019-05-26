@@ -59,7 +59,7 @@ public class Storage extends AppCompatActivity {
         if (startName==null) viewLoc.setText("");
         else viewLoc.setText(startName);
         Float minutes= Float.valueOf(Duration)/60;
-        viewDuration.setText(String.format(Locale.US,"%.1f",minutes));
+        viewDuration.setText(String.format(Locale.ENGLISH,"%.1f",minutes));
         viewNb.setText(String.valueOf(nbData));
         viewPathData.setText(pathData);
         viewPathMeta.setText(pathMeta);

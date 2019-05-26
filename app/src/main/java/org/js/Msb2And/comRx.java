@@ -110,7 +110,7 @@ public class comRx {
         int addr=(int)((s[0]&0xff)>>>4);
         if (addr<0 || addr>15) return;
         int cls=(int)(0xf & s[0]);
-        if (cls<=0 || cls>13) return;
+        if (cls<=0 || cls>15) return;
         if (s[1]==0x80 && s[2]==0x0) return;
         SensorReading sensor=new SensorReading();
         sensor.addr=addr;

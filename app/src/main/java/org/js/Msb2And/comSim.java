@@ -157,6 +157,8 @@ public class comSim {
             else if (fields[i].contains("ml")) addrClass[i-2]=12;
             else if (fields[i].contains("km")) addrClass[i-2]=13;
             else if (fields[i].contains("m")) addrClass[i-2]=8;
+            else if (fields[i].contains("g")) addrClass[i-2]=14;
+            else if (fields[i].contains("[14]")) addrClass[i-2]=14;
             else addrClass[i-2]=0;
         }
     }
@@ -176,6 +178,7 @@ public class comSim {
             case 6:
             case 7:
             case 13:
+            case 14:
                 result.value=(short) (fval*10.0);
                 break;
             case 5:

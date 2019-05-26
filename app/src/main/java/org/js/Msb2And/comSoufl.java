@@ -63,7 +63,7 @@ public class comSoufl {
         if (initialized) {
             myTimer.cancel();
             context.unbindService(usbConnection);
-            usbService.stopSelf();
+            if (usbService!=null) usbService.stopSelf();
             initialized=false;
         }
         return;
@@ -142,7 +142,7 @@ public class comSoufl {
         int addr=(int)((s[0]&0xff)>>>4);
         if (addr<0 || addr>15) return;
         int cls=(int)(0xf & s[0]);
-        if (cls<=0 || cls>13) return;
+        if (cls<=0 || cls>15) return;
         SensorReading sensor=new SensorReading();
         sensor.addr=addr;
         sensor.v_class=cls;
@@ -154,11 +154,9 @@ public class comSoufl {
         if (Math.abs(sensor.value)<16000) sensor.valid=true;
         sensor.inTime=tim;
         if (firstRcv==null) firstRcv=now;
-        if (lastSent==null) lastSent=now;
 //        if ((now-lastSent)>500){
         if ((now-firstRcv)>2000 && allSensor[addr]!=null){
             if (logTime==null) logTime=now;
-            if (lastSent==null) lastSent=now;
             RecordReading fullSensor=new RecordReading();
             fullSensor.logTime=tim-logTime;
             fullSensor.record=allSensor;

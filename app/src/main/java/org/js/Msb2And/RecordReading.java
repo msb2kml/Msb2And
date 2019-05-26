@@ -13,7 +13,7 @@ public class RecordReading {
 
     public String prTime(){
         Float ft= Float.valueOf(logTime)/1000;
-        return String.format(Locale.US,"%.4f",ft);
+        return String.format(Locale.ENGLISH,"%.4f",ft);
     }
 
     public String prTimeG(){

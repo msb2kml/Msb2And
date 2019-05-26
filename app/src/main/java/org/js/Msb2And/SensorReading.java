@@ -68,6 +68,8 @@ public class SensorReading {
                 return "ml";
             case 13:
                 return "km";
+            case 14:
+                return "g";
             default:
                 return "?"+String.valueOf(v_class);
         }
@@ -75,7 +77,7 @@ public class SensorReading {
 
     public String print() {
 
-            return printv(Locale.US, value);
+            return printv(Locale.ENGLISH, value);
     }
 
     public String printG(){
@@ -83,12 +85,12 @@ public class SensorReading {
     }
 
      public String print_max(){
-        return printv(Locale.US, value_max);
+        return printv(Locale.ENGLISH, value_max);
      }
 
      public String print_min(){
 
-         return printv(Locale.US, value_min);
+         return printv(Locale.ENGLISH, value_min);
      }
 
      private String printv(Locale X, short x){
@@ -100,6 +102,7 @@ public class SensorReading {
             case 6:
             case 7:
             case 13:
+            case 14:
                  return String.format(X, "%.1f",  (float)x / 10);
             case 5:
                  return String.valueOf(x * 100);
@@ -124,6 +127,7 @@ public class SensorReading {
             case 6:
             case 7:
             case 13:
+            case 14:
                 x=x/10.0;
                 break;
             case 5:

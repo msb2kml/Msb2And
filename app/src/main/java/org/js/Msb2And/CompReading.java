@@ -18,16 +18,16 @@ public class CompReading {
     }
 
     String print(){
-        return String.format(Locale.US,"%g",value);
+        return String.format(Locale.ENGLISH,"%g",value);
     }
 
     String printMax(){
         if (maximum==null) return "";
-        else return String.format(Locale.US,"%g",maximum);
+        else return String.format(Locale.ENGLISH,"%g",maximum);
     }
 
     String printMin(){
         if (minimum==null) return "";
-        else return String.format(Locale.US,"%g",minimum);
+        else return String.format(Locale.ENGLISH,"%g",minimum);
     }
 }

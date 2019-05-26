@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Created by js on 4/5/18.
@@ -76,7 +77,8 @@ public class DispRecord {
             }
             for (int i=0;i<16;i++){
                 if (named){
-                    minus[i]=mActivity.get().names[i].matches("-");
+                    minus[i]=(mActivity.get().names[i]==null ||
+                            mActivity.get().names[i].matches("-"));
                 } else minus[i]=false;
             }
             for (int i=0; i<16; i++){
@@ -138,7 +140,7 @@ public class DispRecord {
                 String semic="";
                 for (int i=0; i<16; i++){
                     if (lastSensor.record[i]!=null) {
-                        line=line+semic+String.format(" A:%02d;",i);
+                        line=line+semic+String.format(Locale.ENGLISH," A:%02d;",i);
                         semic="";
                     }
                     else semic=semic+";";
@@ -219,7 +221,7 @@ public class DispRecord {
             outMeta.write(line);
             for (int i=0;i<16;i++){
                 if (lastSensor.record[i]!=null){
-                    line=String.format(" A:%02d: ",i);
+                    line=String.format(Locale.ENGLISH," A:%02d: ",i);
                     line=line+lastSensor.record[i].print_min()+";";
                     line=line+lastSensor.record[i].print_max()+"\n";
                     outMeta.write(line);

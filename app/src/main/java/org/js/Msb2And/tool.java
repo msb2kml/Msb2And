@@ -971,6 +971,119 @@ class COL extends tool {
     }
 }
 
+class NRM extends tool {
+
+    Float offset;
+    Float factor;
+
+    public float compute() {
+        float norm=((ArrayList<Float>)args[0].thing).get(args[0].index);
+        return (norm*factor+offset);
+    }
+
+    public boolean check(Monitor f, String[] fields, Character l) {
+        mo=f;
+        if (fields.length<4) return false;
+        if (l != null) label = l;
+        if (fields.length<4) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        try { factor=Float.parseFloat(fields[1]);
+        } catch (NumberFormatException e){
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        try {
+            offset = Float.parseFloat(fields[2]);
+        } catch (NumberFormatException e) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        letter=new char[1];
+        args=new Monitor.Var[1];
+        if (fields[3].length()<2 || !fields[3].startsWith("$")) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        letter[0]=fields[3].charAt(1);
+        args[0]=mo.getVar(letter[0]);
+        if (args[0]==null) {
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkMore(){
+        Monitor.Var v;
+        v=mo.getVar(letter[0]);
+        if (v==null){
+            if (label!=null) mo.delVar(label);
+            return false;
+        }
+        return true;
+    }
+}
+
+class VCT extends tool{
+
+    public float compute() {
+        Double Carre=0.0;
+        Float v;
+        for (int i=0;i<args.length;i++){
+            v=((ArrayList<Float>)args[i].thing).get(args[i].index);
+            Carre+=Math.pow(v.doubleValue(),2);
+        }
+        Carre=Math.sqrt(Carre);
+        v=Carre.floatValue();
+        return v;
+    }
+
+    public boolean check(Monitor f, String fields[], Character l) {
+        mo = f;
+        if (l != null) label = l;
+        if (fields.length<3) {
+            if (label != null) mo.delVar(label);
+            return false;
+        }
+        letter=new char[3];
+        if (fields.length>3) {
+            args=new Monitor.Var[3];
+            letter=new char[3];
+        }
+        else {
+            args=new Monitor.Var[2];
+            letter=new char[2];
+        }
+        for (int i=1;i<(args.length+1);i++){
+            if (fields[i].length()<2 || !fields[i].startsWith("$")) {
+                if (label!=null) mo.delVar(label);
+                return false;
+            }
+            letter[i-1]=fields[i].charAt(1);
+            args[i-1]=mo.getVar(letter[i-1]);
+            if (args[i-1]==null) {
+                if (label!=null) mo.delVar(label);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkMore() {
+        Monitor.Var v;
+        for (int i=0;i<args.length;i++){
+            v=mo.getVar(letter[i]);
+            if (v==null){
+                if (label != null) mo.delVar(label);
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 class tb{
 
     public tool toolBox(Monitor f, String expr, Character l){
@@ -1050,6 +1163,14 @@ class tb{
             return null;
         } else if (fields[0].matches("=COL")){
             tool t=new COL();
+            if (t.check(f, fields,l)) return t;
+            return null;
+        } else if (fields[0].matches("=NRM")){
+            tool t=new NRM();
+            if (t.check(f, fields,l)) return t;
+            return null;
+        } else if (fields[0].matches("=VCT")){
+            tool t=new VCT();
             if (t.check(f, fields,l)) return t;
             return null;
         } else{

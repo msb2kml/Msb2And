@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -495,7 +496,7 @@ public class Monitor extends AppCompatActivity {
         haver=new Haversine();
 // var for direct data
         for (int i=0; i<16; i++){
-            String ad=String.format(" A:%02d",i);
+            String ad=String.format(Locale.ENGLISH," A:%02d",i);
             names[i]=ad;
             if (fullSensor.record[i]==null) continue;
             for (triplet tr : translate){

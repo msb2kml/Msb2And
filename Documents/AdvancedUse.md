@@ -268,7 +268,7 @@ See the screenshot [Screenshot_Slope](Screenshots/Screenshot_Slope.jpg).
 
 ### Distance to a turn point
 
-   =DIST,Turnpoint1,$G,Turnpoint 1
+   =DIST,Turnpoint1,$G;Turnpoint 1
 
 + "Turnpoint1" stands for a location named in the file StartGPS.gpx
 + $G is the result of the reconstruction of the GPS location.
@@ -282,9 +282,30 @@ The location of turnpoints could be entered in the file
 StartGPS.gpx with the help of the application
 [Msb2Kml](https://github.com/msb2kml/Msb2Kml/blob/RemoteGPS/Documents/RemoteGPS.md).
 
+### Normalization of the measures from a sensor
 
+   =NRM,-1,-0.8,$Z;Acceleration
 
++ The first parameter (-1) is a multiplication factor.
++ The second parameter (-0.8) is added to the result.
++ $Z is the reading to process.
 
+This computation is performed: ( $Z * (param 1) ) + (param 2)  
+This could be used to revert the sign for a G-Sensor and introduce
+a compensation for the gravity.  
+It could also be used to convert from Centigrade to Fahrenheit.
+
+### Vectorization
+
+   =VCT,$X,$Y,$Z;Vect. Acc.  
+   =VCT,$X,$Z;Vect. Acc.
+
++ $X is a measure along an axis.
++ $Y is a measure along an axis perpendicular to the previous.
++ $Z is a measure along an axis perpendicular to the 2 previous.
+
+The result is the square root of the sum of the squares of the measures.  
+This function could be used with 2 or 3 parameters.
 
 
 ### Note

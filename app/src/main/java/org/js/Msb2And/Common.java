@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -165,20 +166,20 @@ public class Common {
         File dirM=new File(pathMSBlog);
         while (sltMSBf==null){
             if (minMSBnb>9999) return;
-            String dirAll=String.format("Alle%02dxx",(int)(minMSBnb/100));
+            String dirAll=String.format(Locale.ENGLISH,"Alle%02dxx",(int)(minMSBnb/100));
             File fAlle=new File(dirM,dirAll);
             if (fAlle.exists() && !fAlle.isDirectory()) continue;
             if (!fAlle.exists()){
                 if (!fAlle.mkdirs()) continue;
             }
-            String candMSB=String.format("MSB_%04d",minMSBnb)+".csv";
+            String candMSB=String.format(Locale.ENGLISH,"MSB_%04d",minMSBnb)+".csv";
             File fMSB=new File(fAlle,candMSB);
             if (fMSB.exists()){
                 minMSBnb++;
                 continue;
             }
             sltMSBf=fMSB.getPath();
-            String candMeta=String.format("MSB_%04d",minMSBnb)+".txt";
+            String candMeta=String.format(Locale.ENGLISH,"MSB_%04d",minMSBnb)+".txt";
             File fMeta=new File(dirM,candMeta);
             if (!fMeta.exists()) pathMeta=fMeta.getPath();
             return;
