@@ -709,7 +709,6 @@ class GPS extends tool{
         mo=f;
         if (fields.length<4 || mo.startLoc==null){
             if (label!=null) mo.delVar(label);
-            mo.startLoc=null;
             return false;
         }
         letter=new char[3];
@@ -717,14 +716,12 @@ class GPS extends tool{
         for (int i=1;i<4;i++){
             if (fields[i].length()<2 || !fields[i].startsWith("$")){
                if (label!=null) mo.delVar(label);
-               mo.startLoc=null;
                return false;
             }
             letter[i-1]=fields[i].charAt(1);
             args[i-1]=mo.getVar(letter[i-1]);
             if (args[i-1]==null){
                 if (label!=null) mo.delVar(label);
-                mo.startLoc=null;
                 return false;
             }
         }
@@ -737,7 +734,6 @@ class GPS extends tool{
         Monitor.Var Alti=mo.getVar(letter[2]);
         if (mo.startLoc==null || Azim==null || Dist==null || Alti==null){
             if (label!=null) mo.delVar(label);
-            mo.startLoc=null;
             return false;
         }
         return true;
@@ -892,6 +888,11 @@ class DIST extends tool{
         letter[0]=fields[2].charAt(1);
         loc=mo.nameToLoc(pylone);
         if (loc==null) {
+            if (label !=null) mo.delVar(label);
+            return false;
+        }
+        Double Dist=haver.lHaversine(mo.startLoc,loc);
+        if (Dist>10.0){
             if (label !=null) mo.delVar(label);
             return false;
         }

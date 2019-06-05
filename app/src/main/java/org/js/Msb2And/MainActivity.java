@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
                     launchMonitor();
                 } else if (preselect<ar.length){
                     com.startName=ar[preselect];
-                    startLoc=startPoints.get(startName);
+                    startLoc=startPoints.get(com.startName);
                     launchMonitor();
                 } else if (preselect==ar.length){
                     startLocate();

@@ -17,6 +17,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
 
+import static java.util.Arrays.fill;
+
 public class comSim {
 
     private Handler mHandler=new Handler();
@@ -24,7 +26,7 @@ public class comSim {
         @Override
         public void run() {
             exploit();
-            mHandler.postDelayed(timerTask,500L);
+            mHandler.postDelayed(timerTask,300L);
         }
     };
     private static SensorReading[] allSensor;
@@ -38,8 +40,7 @@ public class comSim {
     private Context context;
     Pattern patSemi=Pattern.compile(";");
 
-    private static int[] addrClass={1, 9, 1, 2,11, 5, 8, 3,
-                                    8, 8, 7, 8, 0, 6, 0, 0};
+    private static int[] addrClass=new int[16];
     private static String testPath;
     private Long nxtTime=0L;
     private boolean running=true;
@@ -52,6 +53,7 @@ public class comSim {
         this.topCom=topCom;
         this.disp=disp;
         this.testPath=testPath;
+        fill(addrClass,0);
         allSensor=new SensorReading[16];
         mHandler.post(timerTask);
         return;
@@ -213,7 +215,7 @@ public class comSim {
             close();
         }
         else {
-            nxtTime = rec.logTime + 500L;
+            nxtTime = rec.logTime + 300L;
             disp.dispRecord(rec, 0L);
         }
     }

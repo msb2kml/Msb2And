@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
+import static java.util.Arrays.fill;
+
 /**
  * Created by js on 4/5/18.
  */
@@ -43,6 +45,7 @@ public class DispRecord {
     private String startName=null;
     private boolean named;
     private boolean[] minus=new boolean[16];
+    int[] recClass=new int[16];
 
     public void setVar(Context context, WeakReference<Monitor> mActivity,
                        int from, String pathMSBfile, String pathMeta,
@@ -65,96 +68,101 @@ public class DispRecord {
     }
 
     public void dispRecord(RecordReading fullSensor, long old){
-        ArrayList<CompReading>cr=null;
-        if (named)  mActivity.get().stDirect(fullSensor);
-        SensorReading[] asmbl=new SensorReading[16];
+        boolean changed=false;
+        boolean empty=true;
         ArrayList<Object> ob=new ArrayList<>();
+        ArrayList<CompReading> cr=null;
+        lastSensor.logTime=fullSensor.logTime;
+        for (int i=0;i<16;i++){
+            if (fullSensor.record[i]!=null){
+                if (lastSensor.record[i]==null){
+                    changed=true;
+                    lastSensor.record[i]=fullSensor.record[i];
+                } else lastSensor.record[i].cp(fullSensor.record[i]);
+            }
+            if (lastSensor.record[i]!=null){
+                empty=false;
+            }
+        }
+        if (empty) return;
+        if (changed) mActivity.get().reCmpl(lastSensor);
         if (mActivity.get().startTime==null) mActivity.get().startTime=Calendar.getInstance();
+        for (int i=0;i<16;i++){
+            if (lastSensor.record[i]!=null){
+                if (lastSensor.logTime>2) lastSensor.record[i].chkXtrm();
+                if (lastSensor.record[i].inTime<old) lastSensor.record[i].valid=false;
+                if (!mActivity.get().named || !mActivity.get().names[i].matches("-"))
+                    ob.add(lastSensor.record[i]);
+            }
+        }
+        if (named){
+            mActivity.get().stDirect(lastSensor);
+            cr=mActivity.get().stCalc();
+            if (cr!=null && !cr.isEmpty()) ob.addAll(cr);
+        }
         if (list==null){
             list=(ListView) mActivity.get().findViewById(R.id.list);
-            if (named){
-                cr=mActivity.get().cmplDirect(fullSensor);
-            }
-            for (int i=0;i<16;i++){
-                if (named){
-                    minus[i]=(mActivity.get().names[i]==null ||
-                            mActivity.get().names[i].matches("-"));
-                } else minus[i]=false;
-            }
-            for (int i=0; i<16; i++){
-                if (fullSensor.record[i]!=null && !minus[i]){
-                    if (fullSensor.logTime>2) fullSensor.record[i].chkXtrm();
-                    ob.add((fullSensor.record[i]));
-                }
-            }
-            if (named) {
-                if (cr!=null && !cr.isEmpty()) ob.addAll(cr);
-                mActivity.get().stCalc();
-            }
             mAdapter=new MyListAdapter(contextMoni,mActivity,ob);
             list.setAdapter(mAdapter);
             if (mActivity.get().intentMap!=null){
                 list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    public void onItemClick(AdapterView<?> parent, View view,
+                                            int position, long id) {
                         mActivity.get().runMap(position);
                     }
                 });
             }
         } else {
-            for (int i = 0; i < mAdapter.getCount(); i++) {
-                Object o=mAdapter.getItem(i);
-                if (o.getClass().getSimpleName().matches("SensorReading")) {
-                    SensorReading sens = (SensorReading) o;
-                    int addr = sens.addr;
-                    if (sens.inTime < old) {
-                        sens.valid = false;
-                    }
-                    asmbl[addr] = sens;
-                }
-            }
-            for (int i = 0; i < 16; i++) {
-                if (fullSensor.record[i] != null) {
-                    if (asmbl[i] == null) asmbl[i] = fullSensor.record[i];
-                    else asmbl[i].cp(fullSensor.record[i]);
-                }
-                if (asmbl[i] != null && !minus[i]) {
-                    if (fullSensor.logTime>2) asmbl[i].chkXtrm();
-                    ob.add(asmbl[i]);
-                }
-            }
             mAdapter.getSensor().clear();
             mAdapter.getSensor().addAll(ob);
-            if (named){
-                cr=mActivity.get().stCalc();
-                if (cr!=null && !cr.isEmpty()) mAdapter.getSensor().addAll(cr);
-            }
             mAdapter.notifyDataSetChanged();
         }
-        lastSensor.cp(fullSensor);
         if (mActivity.get().runningMap) setBubble(mActivity.get().objPosMap);
         try {
-            if (nMeas == 0 && pathMSBfile!=null) {
-                outMSBfile = new FileWriter(pathMSBfile);
-                String line="$SETUP1;Time;";
+            if (pathMSBfile!=null){
+                if (outMSBfile==null) {
+                    outMSBfile = new FileWriter(pathMSBfile);
+                    fill(recClass, 0);
+                }
+                boolean setup=false;
+                String line="$D;"+lastSensor.prTimeG()+";";
                 String semic="";
                 for (int i=0; i<16; i++){
                     if (lastSensor.record[i]!=null) {
-                        line=line+semic+String.format(Locale.ENGLISH," A:%02d;",i);
+                        if (lastSensor.record[i].v_class != recClass[i]){
+                            recClass[i]=lastSensor.record[i].v_class;
+                            setup=true;
+                        }
+                        line=line+semic+lastSensor.record[i].printG()+";";
                         semic="";
                     }
                     else semic=semic+";";
                 }
-                outMSBfile.write(line+"\n");
-                line="$SETUP2;sec ;";
-                semic="";
-                for (int i=0; i<16; i++){
-                    if (lastSensor.record[i]!=null){
-                        line=line+semic+lastSensor.record[i].heading()+";";
-                        semic="";
-                    } else semic=semic+";";
+                if (setup) {
+                    String lineSetup = "$SETUP1;Time;";
+                    semic = "";
+                    for (int i = 0; i < 16; i++) {
+                        if (recClass[i]!=0) {
+                            lineSetup = lineSetup + semic +
+                                    String.format(Locale.ENGLISH, " A:%02d;", i);
+                            semic = "";
+                        } else semic = semic + ";";
+                    }
+                    outMSBfile.write(lineSetup + "\n");
+                    lineSetup = "$SETUP2;sec ;";
+                    semic = "";
+                    SensorReading s=new SensorReading();
+                    for (int i = 0; i < 16; i++) {
+                        if (recClass[i]!=0) {
+                            s.v_class=recClass[i];
+                            lineSetup = lineSetup + semic + s.heading() + ";";
+                            semic = "";
+                        } else semic = semic + ";";
+                    }
+                    outMSBfile.write(lineSetup + "\n");
                 }
-                outMSBfile.write(line+"\n");
+                outMSBfile.write(line+"*00\n");
             }
         }
         catch (Exception e){
@@ -164,23 +172,6 @@ public class DispRecord {
         else if (from==Soufl) onAir.setText("On Air");
         secText.setText(lastSensor.prTime());
         nMeas++;
-        if (outMSBfile!=null){
-            try {
-                String line="$D;"+lastSensor.prTimeG()+";";
-                String semic="";
-                for (int i=0; i<16; i++){
-                    if (lastSensor.record[i]!=null) {
-                        line=line+semic+lastSensor.record[i].printG()+";";
-                        semic="";
-                    }
-                    else semic=semic+";";
-                }
-                outMSBfile.write(line+"*00\n");
-            }
-            catch (Exception e){
-                outMSBfile=null;
-            }
-        }
         return;
     }
 

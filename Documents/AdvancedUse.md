@@ -280,7 +280,9 @@ to the location of "Turnpoint1".
 Of course, this function could be invoked for several locations.  
 The location of turnpoints could be entered in the file
 StartGPS.gpx with the help of the application
-[Msb2Kml](https://github.com/msb2kml/Msb2Kml/blob/RemoteGPS/Documents/RemoteGPS.md).
+[Msb2Kml](https://github.com/msb2kml/Msb2Kml/blob/RemoteGPS/Documents/RemoteGPS.md).  
+This function is ignored if the distance from "Turnpoint1" to the flight start
+location is greater than 10 Km.
 
 ### Normalization of the measures from a sensor
 

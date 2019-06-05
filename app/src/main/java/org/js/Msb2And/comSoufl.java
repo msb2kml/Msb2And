@@ -155,7 +155,7 @@ public class comSoufl {
         sensor.inTime=tim;
         if (firstRcv==null) firstRcv=now;
 //        if ((now-lastSent)>500){
-        if ((now-firstRcv)>2000 && allSensor[addr]!=null){
+        if ((now-firstRcv)>1000 && allSensor[addr]!=null){
             if (logTime==null) logTime=now;
             RecordReading fullSensor=new RecordReading();
             fullSensor.logTime=tim-logTime;

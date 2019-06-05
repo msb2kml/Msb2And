@@ -6,8 +6,8 @@ android {
         applicationId "org.js.Msb2And"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 13
-        versionName '1.3 =COL function and colorized tail'
+        versionCode 14
+        versionName '1.4 Evolutive setup'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

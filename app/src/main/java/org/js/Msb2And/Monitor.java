@@ -69,7 +69,7 @@ public class Monitor extends AppCompatActivity {
     boolean useDist=false;
     Location startLoc;
     Location prevLoca=null;
-    Haversine haver;
+    Haversine haver=null;
     ArrayList<Float> totDist=new ArrayList<Float>();
     ArrayList <Float> fData=new ArrayList<Float>();
     Integer varTime=null;
@@ -92,6 +92,8 @@ public class Monitor extends AppCompatActivity {
                           Color.rgb(0x24,0x00,0xDA),
                           Color.rgb(0x00,0x00,0xFF)};
     int nColor=lineColor.length;
+    SensorReading[] seenAddr=new SensorReading[16];
+    tb t=new tb();
 
     public static WeakReference<Monitor> myAct;
 
@@ -117,6 +119,7 @@ public class Monitor extends AppCompatActivity {
         if (named){
             for (int i=0;i<16;i++){
                 fData.add(0.0f);
+                names[i]=String.format(Locale.ENGLISH," A:%02d",i);
             }
             pathAddr=intent.getStringExtra("pathAddr");
             pathStartGPS=intent.getStringExtra("pathStartGPS");
@@ -467,6 +470,77 @@ public class Monitor extends AppCompatActivity {
         return false;
     }
 
+    public void reCmpl(RecordReading fullSensor){
+        if (named){
+            fData.clear();
+            variables.clear();
+            compHead.clear();
+            compTool.clear();
+            totDist.clear();
+            listComp.clear();
+            if (haver==null) haver=new Haversine();
+// var for direct data
+            for (int i=0;i<16;i++){
+                fData.add(0.0f);
+                names[i]=String.format(Locale.ENGLISH," A:%02d",i);
+            }
+            varTime=16;
+            fData.add(0.0f);
+            for (int i=0; i<16; i++){
+                if (fullSensor.record[i]==null) continue;
+                for (triplet tr : translate){
+                    if (names[i].matches(tr.addr)){
+                        if (tr.subst!=null) names[i]=tr.subst;
+                        if (tr.var!=null) setVar(tr.var,(Object)fData,i);
+                        break;
+                    }
+                }
+            }
+// var for functions
+            for (triplet tr : translate) {
+                if (tr.addr.startsWith("=")) {
+                    fData.add(0.0f);
+                    if (tr.var != null) setVar(tr.var, (Object) fData, fData.size() - 1);
+                } else if (tr.addr.startsWith("Time") && tr.var != null) {
+                    setVar(tr.var, (Object) fData, varTime);
+                }
+            }
+// identify functions
+            for (triplet tr : translate) {
+                if (tr.addr.startsWith("=")) {
+                    tool x = t.toolBox(this, tr.addr, tr.var);
+                    compTool.add(x);
+                    compHead.add(tr.subst);
+                }
+            }
+// check for availibilty of var
+            boolean ok=(compTool.size()<1);
+            while (!ok){
+                ok=true;
+                for (int it=0;it<compTool.size();it++){
+                    if (compTool.get(it)!=null){
+                        if (!compTool.get(it).checkMore()){
+                            compTool.set(it,null);
+                            ok=false;
+                        }
+                    }
+                }
+            }
+// compose list
+            for (int i=0;i<compTool.size();i++){
+                if (compTool.get(i)!=null && !compHead.get(i).matches("-")){
+                    CompReading cr=new CompReading();
+                    cr.heading=compHead.get(i);
+                    cr.func=compTool.get(i).getClass().getSimpleName();
+                    listComp.add(cr);
+                }
+            }
+            checkMap();
+            colorVar=getVar('%');
+        }
+        return;
+    }
+
     public void stDirect(RecordReading fullSensor){
         for (int i = 0; i < 16; i++) {
                 if (fullSensor.record[i] != null)
@@ -488,67 +562,6 @@ public class Monitor extends AppCompatActivity {
                 }
             }
         }
-        return listComp;
-    }
-
-    public ArrayList<CompReading> cmplDirect(RecordReading fullSensor){
-        if (translate.isEmpty()) return null;
-        haver=new Haversine();
-// var for direct data
-        for (int i=0; i<16; i++){
-            String ad=String.format(Locale.ENGLISH," A:%02d",i);
-            names[i]=ad;
-            if (fullSensor.record[i]==null) continue;
-            for (triplet tr : translate){
-                if (ad.matches(tr.addr)){
-                    if (tr.subst!=null) names[i]=tr.subst;
-                    if (tr.var!=null) setVar(tr.var,(Object)fData,i);
-                    break;
-                }
-            }
-        }
-// var for functions
-        for (triplet tr : translate){
-            if (tr.addr.startsWith("=")){
-                fData.add(0.0f);
-                if (tr.var!=null) setVar(tr.var,(Object)fData,fData.size()-1);
-            } else if (tr.addr.startsWith("Time") && tr.var!=null){
-                setVar(tr.var,(Object)fData,varTime);
-            }
-        }
-// identify functions
-        tb t=new tb();
-        for (triplet tr : translate){
-            if (tr.addr.startsWith("=")){
-                tool x=t.toolBox(this,tr.addr,tr.var);
-                compTool.add(x);
-                compHead.add(tr.subst);
-            }
-        }
-// check for availibilty of var
-        boolean ok=(compTool.size()<1);
-        while (!ok){
-            ok=true;
-            for (int it=0;it<compTool.size();it++){
-                if (compTool.get(it)!=null){
-                    if (!compTool.get(it).checkMore()){
-                        compTool.set(it,null);
-                        ok=false;
-                    }
-                }
-            }
-        }
-// compose list
-        for (int i=0;i<compTool.size();i++){
-            if (compTool.get(i)!=null && !compHead.get(i).matches("-")){
-                CompReading cr=new CompReading();
-                cr.heading=compHead.get(i);
-                cr.func=compTool.get(i).getClass().getSimpleName();
-                listComp.add(cr);
-            }
-        }
-        checkMap();
-        colorVar=getVar('%');
         return listComp;
     }
 
