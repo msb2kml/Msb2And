@@ -79,18 +79,23 @@ public class Monitor extends AppCompatActivity {
     ArrayList<CompReading> listComp=new ArrayList<>();
     Intent intentMap=null;
     Boolean runningMap=false;
+    Double zoom=17.0;
     Integer reqCdStore=1;
     Integer objPosMap=null;
     String bubbleMap=null;
     Var colorVar=null;
-    Integer[] lineColor={ Color.rgb(0xFF,0x00,0x00),
-                          Color.rgb(0xDA,0x00,0x24),
-                          Color.rgb(0xB6,0x00,0x48),
-                          Color.rgb(0x91,0x00,0x6D),
-                          Color.rgb(0x6D,0x00,0x91),
-                          Color.rgb(0x48,0x00,0xB6),
-                          Color.rgb(0x24,0x00,0xDA),
-                          Color.rgb(0x00,0x00,0xFF)};
+    Integer[] lineColor={ Color.rgb(0x00,0x00,0xFF),
+                          Color.rgb(0x00,0x63,0xF3),
+                          Color.rgb(0x00,0x92,0xDE),
+                          Color.rgb(0x00,0xB7,0xC2),
+                          Color.rgb(0x00,0xD6,0xA0),
+                          Color.rgb(0x54,0xDD,0x74),
+                          Color.rgb(0x85,0xE0,0x46),
+                          Color.rgb(0xAD,0xE1,0x00),
+                          Color.rgb(0xD9,0xC6,0x00),
+                          Color.rgb(0xFF,0xA5,0x00),
+                          Color.rgb(0xFF,0x78,0x00),
+                          Color.rgb(0xFF,0x00,0x00)};
     int nColor=lineColor.length;
     SensorReading[] seenAddr=new SensorReading[16];
     tb t=new tb();
@@ -586,6 +591,8 @@ public class Monitor extends AppCompatActivity {
         nt.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         nt.putExtra("CALLER","Msb2And");
         nt.putExtra("CENTER",startLoc);
+        if (zoom!=null) nt.putExtra("ZOOM",zoom);
+        zoom=null;
         runningMap=true;
         startActivity(nt);
     }

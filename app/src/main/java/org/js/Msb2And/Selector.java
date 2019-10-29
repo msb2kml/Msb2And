@@ -34,7 +34,6 @@ public class Selector extends AppCompatActivity {
         theList = nav.get();
         theSelected = -1;
         AlertDialog.Builder build=new AlertDialog.Builder(this);
-//                    android.R.style.Theme_DeviceDefault_Light_NoActionBar);
         build.setTitle(nav.getDir())
            .setOnCancelListener(new DialogInterface.OnCancelListener() {
                         @Override
@@ -82,7 +81,6 @@ public class Selector extends AppCompatActivity {
         theList=nav.get();
         theSelected=-1;
         AlertDialog.Builder build=new AlertDialog.Builder(this);
-//                    android.R.style.Theme_DeviceDefault_Light_NoActionBar);
         build.setTitle(nav.getDir())
            .setOnCancelListener(new DialogInterface.OnCancelListener() {
                         @Override

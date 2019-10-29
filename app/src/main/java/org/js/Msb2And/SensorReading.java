@@ -51,7 +51,7 @@ public class SensorReading {
             case 4:
                 return "km/h";
             case 5:
-                return "t/min";
+                return "1/min";
             case 6:
                 return deg.toString()+"C";
             case 7:

@@ -149,7 +149,7 @@ public class comSim {
             if (fields[i].contains("V")) addrClass[i-2]=1;
             else if (fields[i].contains("m/s")) addrClass[i-2]=3;
             else if (fields[i].contains("km/h")) addrClass[i-2]=4;
-            else if (fields[i].contains("t/min")) addrClass[i-2]=5;
+            else if (fields[i].contains("1/min")) addrClass[i-2]=5;
             else if (fields[i].contains(deg.toString()+"C")) addrClass[i-2]=6;
             else if (fields[i].contains(deg.toString())) addrClass[i-2]=7;
             else if (fields[i].contains("% LQI")) addrClass[i-2]=10;

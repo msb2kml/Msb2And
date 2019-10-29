@@ -48,7 +48,7 @@ the GPS track, if the track is reconstructed.
 The variable named "%" could be defined and it has a special
 signification. It should be in the range 0.0 to 100.0.  
 There is a relation between the value of this variable
-and a color: from RED (0%) to BLUE (100%) in 8 levels.  
+and a color: from BLUE (0%) through GREEN to RED (100%) in 12 levels.  
 The color is used for the segments of the tail on the map.
 
 
@@ -278,7 +278,7 @@ See the screenshot [Screenshot_Slope](Screenshots/Screenshot_Slope.jpg).
 This compute the distance in meters (rounded) from the plane
 to the location of "Turnpoint1".  
 Of course, this function could be invoked for several locations.  
-The location of turnpoints could be entered in the file
+The location of turn points could be entered in the file
 StartGPS.gpx with the help of the application
 [Msb2Kml](https://github.com/msb2kml/Msb2Kml/blob/RemoteGPS/Documents/RemoteGPS.md).  
 This function is ignored if the distance from "Turnpoint1" to the flight start

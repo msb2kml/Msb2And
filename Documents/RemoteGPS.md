@@ -31,7 +31,7 @@ Each known pilot locations is referenced for the application by a name.
 This name is a label for a location stored in a file
 StartGPS.gpx in the MSBlog directory.  
 The file StartGPS.gpx is shared with the application Msb2Kml
-and could be opened by an application like OsmAnd
+and could be opened by an application like Msb2Map
 to check the locations on a map.
 
 There are three methods available to record such a location:

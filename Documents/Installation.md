@@ -2,7 +2,7 @@
 The application should be compiled from the sources of this
 repository or downloaded from the "**Releases**" pages.
 
-The application package (Msb2And_XXX.apk) should be transferred 
+The application package (Msb2AndXXX.apk) should be transferred 
 to the storage of the device (such as Downloads).  
 Selecting it with a File Manager should offer the opportunity to install it.
 
