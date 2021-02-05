@@ -1,7 +1,10 @@
 # First use
 
-# Storage
- At the first use this application request the right to write to the
+This application is displayed only in portrait orientation.
+
+## Storage
+
+At the first use this application requests the right to write to the
 internal SD card. This is usually a partition set aside from the
 main storage.  
 It is possible to work without granting this permission: there is then
@@ -13,10 +16,12 @@ application of the family: Msb2Kml.
 It is created if not already existing. This directory is located
 in the directory /storage/sdcard/ or /storage/emulated/0/,
 function of the Android version.  
-This directory could contain a file "AddrSens.txt"
+This directory could contain a file "**AddrSens.txt**"
 used to customize the headings and to provide formulas
 for advanced usage. If this file does not exist,
-the program proposes to create a default one.
+the program proposes to create a default one.  
+The user has to edit this file to adapt it to the settings
+of her/his telemetry system.
 
 The telemetry data is recorded in files mimicking the ones recorded
 by the Multiplex Flight Recorder. Theses files have a name of the
@@ -25,12 +30,12 @@ form "**MSB\_xxxx.csv**" where "xxxx" is a unique number from "0000" to
 The files are spread in sub directories named as "**Allexx**"
 where "xx" is the 2 first digits of the "xxxx" of the files it contains.
 Theses sub directories are created as needed.  
-The Flight Recorder start the sequence of files at "**MSB\_0000.csv**"
+The Flight Recorder starts the sequence of files at "**MSB\_0000.csv**"
 and increments.  
 This application Msb2And start at "**MSB\_5000.csv**" and increments
 until a free name is found.
 
-# Starting
+## Starting
 The USB-OTG cable should be connected to the Android device.
 For some configurations it is necessary to provide a power supply
 to the USB bus.  
@@ -38,8 +43,8 @@ The Multiplex interface cable should be connected on a side to
 the USB-OTG cable and on the other side to the MSB connector
 of the Souffleur or to the sensor port of the receiver.
 
-The application works exclusively with a portrait orientation.
-It is launched from a red and green icon with the letters "M/A".
+The application is launched from a red and green icon with
+the letters "M/A".
 
 Once the application is launched you have to chose between a setup
 for the Souffleur or for the receiver. The configuration of the
@@ -51,15 +56,16 @@ This is a file with a name like "**MSB_xxxx.csv**": see "**Simulation**"
 in this directory.
 
 There is also an option to use or not the file AddrSens.txt.  
-If this file is to be used you have to provide the starting
-location for a possible GPS track reconstruction: see
-the file "**RemoteGPS**" in this directory.
+If this file is used and a GPS track reconstruction is
+scheduled you should provide the name of the start location
+and maybe the name of a reference GPX file to display
+on the map: see the file "**RemoteGPS**" in this directory.
 
-See the screenshot [Screenshot_Start](Screenshots/Screenshot_Start.jpg).
+![Screenshot_Start](Screenshots/Screenshot_Start.jpg).
 
-# Monitoring
+## Monitoring
 Once the data source has been selected you are presented with
-a button "**Start**". Listening for data start when this button is pushed.  
+a button "**Start**". Listening for data starts when this button is pushed.  
 You could have to authorize the access to the USB port.
 
 So long as data is received you have a running count of the seconds
@@ -75,7 +81,7 @@ For each entry:
 Scrolling could be used to see the higher addresses.  
 The screen never sleep in this phase.
 
-See the screenshot [Screenshot_Raw](Screenshots/Screenshot_Raw.jpg).
+![Screenshot_Raw](Screenshots/Screenshot_Raw.jpg).
 
 This could be followed by entries for processed data: see "**AdvancedUse**".
 
@@ -88,8 +94,8 @@ could be used to give a name to the addresses
 
 ### Basic use of AddrSens.txt
 This file provides some customization.  
-All lines of this file starting with a star "\*" are comments that
-are skipped.  
+Any line of this file starting with a star "\*" is a comment that
+is skipped.  
 Each active line is composed of 3 fields separated by a semi-colon ";"
 but the third field is optional.  
 For the basic usage, the first field has to be exactly as the heading of
@@ -109,9 +115,9 @@ value of the entry for each sample: see "**AdvancedUse**".
 The significant character for this third field could be preceded
 by ignored white spaces: this provides for a better readability.
 
-See the screenshot [Screeshot_Slope](Screenshots/Screenshot_Slope.jpg).
+![Screeshot_Slope](Screenshots/Screenshot_Slope.jpg).
 
-# Stop monitoring
+## Stop monitoring
 The application run until the "**Stop**" button is pushed.  
 It is the end if the right to write to storage has not been granted.
 

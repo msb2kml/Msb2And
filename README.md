@@ -1,5 +1,5 @@
 # Purpose
-The Msb2And Android application is designed to display on line the
+The Msb2And Android application is designed to display in flight the
 data collected by the sensors on the MSB telemetry bus.  
 It is able to use this data to compute and display secondary parameters.  
 Among theses capabilities there is the possibility to compute
@@ -9,13 +9,15 @@ This application is probably more useful to a coach than
 directly to the pilot.
 
 The Android device is connected remotely through a
-[Multiplex Souffleur](https://www.multiplex-rc.de/produkte/45185-souffleur-deutsch) or
+[Multiplex Souffleur](https://www.multiplex-rc.de/Downloads/Multiplex/Bedienungsanleitungen/45185-bedienungsanleitung-souffleur--de-en-fr-it-es.pdf) or
 directly to the MSB bus of the receiver (for a test on the ground).  
 It could also be connected to the COM port of a Multiplex HF module.
 
 You need a USB-OTG cable and a
 [Multiplex USB interface](https://www.multiplex-rc.de/produkte/85149-usb-pc-kabel-rx-s-telemetrie-uni).
 
+The application should be authorized to obtain the geographic location
+from the GPS.  
 If the application is authorized to write to the storage system,
 it could record files with the same format as the
 [Multiplex Flight Recorder](https://www.multiplex-rc.de/produkte/85420-flightrecorder).  
@@ -33,6 +35,11 @@ Oreo (8.0).
 It could be compiled from the sources in this repository or
 downloaded from the [Releases](https://github.com/msb2kml/Msb2And/releases)
 pages.
+
+In each case the application package (such as Msb2And160.apk) should be
+transferred to the storage of the device (such as Downloads).
+Selecting it with a File Manager should offer the opportunity
+to install it.
 
 # Library
 This application make use of the library

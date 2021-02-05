@@ -44,7 +44,6 @@ public class comSim {
     private static String testPath;
     private Long nxtTime=0L;
     private boolean running=true;
-    private Long now;
     private Long startOpen=null;
     private Timer myTimer;
 
@@ -85,18 +84,16 @@ public class comSim {
         mHandler.post(timerTask);
     }
 
-
-    RecordReading nwRec(){
-        RecordReading fullSensor=new RecordReading();
-        SensorReading place=new SensorReading();
-        place.v_class=0;
-        place.alarm=false;
-        place.valid=false;
-        place.value=0;
+    String[] nwRec1(){
         String line=rLine();
         if (line==null) return null;
         String fields[]=patSemi.split(line.replace(",","."));
-        fullSensor.logTime=(long)(Float.parseFloat(fields[1])*1000.0);
+        return fields;
+    }
+
+    RecordReading nwRec2(String[] fields, Long when){
+        RecordReading fullSensor=new RecordReading();
+        fullSensor.logTime=when;
         int nf=fields.length;
         for (int i=2;i<nf-1;i++){
             if (!fields[i].isEmpty() && fields[i].matches(".*[0-9]+")){
@@ -104,8 +101,7 @@ public class comSim {
                 fullSensor.record[i-2]=mkSR(i-2,v);
             }
         }
-        int j=fullSensor.record.length;
-        return  fullSensor;
+        return fullSensor;
     }
 
     private String rLine(){
@@ -203,19 +199,22 @@ public class comSim {
 
     public void exploit(){
         RecordReading rec=null;
-        now=System.currentTimeMillis();
         Long diff=-1L;
+        Long when=null;
+        String[] fields=null;
         while (diff<0L){
-            rec=nwRec();
-            if (rec==null) break;
-            diff=rec.logTime-nxtTime;
+            fields=nwRec1();
+            if (fields==null) break;
+            when=(long)(Float.parseFloat(fields[1])*1000.0);
+            diff=when-nxtTime;
         }
-        if (rec==null){
+        if (fields==null){
             topCom.obtainMessage(1, (Object) false).sendToTarget();
             close();
         }
         else {
-            nxtTime = rec.logTime + 300L;
+            rec=nwRec2(fields,when);
+            nxtTime = when + 300L;
             disp.dispRecord(rec, 0L);
         }
     }

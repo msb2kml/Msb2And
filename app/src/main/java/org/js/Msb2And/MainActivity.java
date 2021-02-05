@@ -51,9 +51,15 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Location> biLoc=null;
     String[] ar=new String[0];
     Integer preselect=null;
+    String refPath =null;
+    String refDirectory =null;
     final int activGetFix=10;
     final int activHandFix=11;
     final int activCopyFix=12;
+    final int selRefGpx =15;
+    Button bRef =null;
+    Button bStLo=null;
+    Boolean firstStart=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,68 +116,88 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void start1(){
-        final String startName=com.startName;
-        final String pathStartGPS=com.pathStartGPS;
-        final Button bSouf=(Button) findViewById(R.id.buttonSouf);
-        final Button bRx=(Button) findViewById(R.id.buttonRx);
-        final Button bSim=(Button) findViewById(R.id.buttonSim);
-        final Button bStop=(Button) findViewById(R.id.buttonStop);
-        final CheckBox cNamed=(CheckBox) findViewById(R.id.checkNamed);
-        com.getMSBdirs();
-        com.named=com.isAddr;
-        cNamed.setActivated(com.named);
-        bStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                com.bye();
-            }
-        });
-        bSouf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (com.named) com.named=cNamed.isChecked();
-                From=getResources().getInteger(R.integer.Soufl);
-                if (com.named) methodGPS();
-                else launchMonitor();
-            }
-        });
-        bRx.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (com.named) com.named=cNamed.isChecked();
-                From=getResources().getInteger(R.integer.Rx);
-                launchMonitor();
-            }
-        });
-        bSim.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (com.named) com.named=cNamed.isChecked();
-                From=getResources().getInteger(R.integer.Simu);
-                Intent intent=new Intent(MainActivity.this,Selector.class);
-                intent.putExtra("CurrentDir",Directory);
-                intent.putExtra("WithDir",false);
-                intent.putExtra("Mask","MSB_\\d{4}+\\.csv");
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivityForResult(intent,2);
-            }
-        });
+        if (firstStart) {
+            final String pathStartGPS = com.pathStartGPS;
+            final Button bSouf = (Button) findViewById(R.id.buttonSouf);
+            final Button bRx = (Button) findViewById(R.id.buttonRx);
+            final Button bSim = (Button) findViewById(R.id.buttonSim);
+            final Button bStop = (Button) findViewById(R.id.buttonStop);
+            final CheckBox cNamed = (CheckBox) findViewById(R.id.checkNamed);
+            bRef = (Button) findViewById(R.id.bRef);
+            bStLo=(Button) findViewById(R.id.bStLo);
+            refPath = null;
+            File f = new File(pathStartGPS);
+            refDirectory=f.getParent();
+            bRef.setText("-none-");
+            com.getMSBdirs();
+            com.named = com.isAddr;
+            cNamed.setActivated(com.named);
+            bStop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    com.bye();
+                }
+            });
+            bSouf.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (com.named) com.named = cNamed.isChecked();
+                    From = getResources().getInteger(R.integer.Soufl);
+                    launchMonitor();
+                }
+            });
+            bRx.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (com.named) com.named = cNamed.isChecked();
+                    From = getResources().getInteger(R.integer.Rx);
+                    launchMonitor();
+                }
+            });
+            bSim.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (com.named) com.named = cNamed.isChecked();
+                    From = getResources().getInteger(R.integer.Simu);
+                    Intent intent = new Intent(MainActivity.this, Selector.class);
+                    intent.putExtra("CurrentDir", Directory);
+                    intent.putExtra("WithDir", false);
+                    intent.putExtra("Mask", "MSB_\\d{4}+\\.csv");
+                    intent.putExtra("Title", "Select a log file from ");
+                    if (testPath != null) intent.putExtra("Previous", testPath);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivityForResult(intent, 2);
+                }
+            });
+            bRef.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selectRef();
+                }
+            });
+            String st=com.startName;
+            if (st==null) bStLo.setText("-none-");
+            else bStLo.setText(com.startName);
+            bStLo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    methodGPS();
+                }
+            });
+            firstStart=false;
+        }
     }
 
-    void launchSim(){
-        Intent intent=new Intent(MainActivity.this,Monitor.class);
-        intent.putExtra("from",getResources().getInteger(R.integer.Simu));
-        intent.putExtra("named",com.named);
-        intent.putExtra("pathAddr",com.pathAddr);
-        intent.putExtra("pathMSBfile",com.sltMSBf);
-        intent.putExtra("pathMeta",com.pathMeta);
-        intent.putExtra("plane",com.plane);
-        intent.putExtra("comment",com.comment);
-        intent.putExtra("pathStartGPS",com.pathStartGPS);
-        if (com.startName!=null) intent.putExtra("startName",com.startName);
-        intent.putExtra("testPath",testPath);
+    void selectRef(){
+        Intent intent=new Intent(MainActivity.this, Selector.class);
+        if (refDirectory !=null) intent.putExtra("CurrentDir", refDirectory);
+        intent.putExtra("WithDir",false);
+        intent.putExtra("Mask","(?i).+\\.gpx");
+        intent.putExtra("Title","Reference GPX?      ");
+        if (refPath !=null) intent.putExtra("Previous", refPath);
+        else intent.putExtra("Previous",com.pathStartGPS);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivityForResult(intent,1);
+        startActivityForResult(intent, selRefGpx);
     }
 
     @Override
@@ -195,8 +221,7 @@ public class MainActivity extends AppCompatActivity {
                             Directory = f.getParent();
                             com.Directory = Directory;
                             From=getResources().getInteger(R.integer.Simu);
-                            if (com.named) methodGPS();
-                            else launchMonitor();
+                            launchMonitor();
                         }
                     } else com.bye();
                     break;
@@ -207,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
                         dupLoc(requestCode,0);
                     } else {
                         com.startName=null;
-                        launchMonitor();
+                        bStLo.setText("-none-");
                     }
                     break;
                 case activHandFix:
@@ -217,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
                         dupLoc(requestCode,0);
                     } else {
                         com.startName=null;
-                        launchMonitor();
+                        bStLo.setText("-none-");
                     }
                     break;
                 case activCopyFix:
@@ -228,24 +253,37 @@ public class MainActivity extends AppCompatActivity {
                         dupLoc(requestCode,which);
                     } else {
                         com.startName=null;
-                        launchMonitor();
+                        bStLo.setText("-none-");
                     }
                     break;
+                case selRefGpx:
+                    if (resultCode==RESULT_OK){
+                        refPath =data.getStringExtra("Path");
+                        if (refPath ==null || refPath.isEmpty()) refPath =null;
+                    } else refPath =null;
+                    if (refPath ==null) bRef.setText("-none-");
+                    else {
+                       File f=new File(refPath);
+                       String bGname = (f.getName());
+                       refDirectory =f.getParent();
+                       bRef.setText(bGname);
+                    }
+                break;
             }
     }
 
     void dupLoc(int requestCode, final int selWhich){
         if (sGPS==null) sGPS=new StartGPS(com.pathStartGPS);
         startPoints=sGPS.readSG();
-        if (startLoc!=null && com.startName!=null && !com.startName.isEmpty()){
-            if (startPoints.containsKey(com.startName)){
-                AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        if (startLoc!=null && com.startName!=null && !com.startName.isEmpty()) {
+            if (startPoints.containsKey(com.startName)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Duplicate name")
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialog) {
-                                com.startName=null;
-                                launchMonitor();
+                                com.startName = null;
+                                bStLo.setText("-none-");
                             }
                         })
                         .setTitle(com.startName)
@@ -253,9 +291,9 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 startPoints.remove(com.startName);
-                                startPoints.put(com.startName,startLoc);
+                                startPoints.put(com.startName, startLoc);
                                 sGPS.writeSG(startPoints);
-                                launchMonitor();
+                                bStLo.setText(com.startName);
                             }
                         })
                         .setNegativeButton("Change", new DialogInterface.OnClickListener() {
@@ -266,11 +304,11 @@ public class MainActivity extends AppCompatActivity {
                         });
                 builder.show();
             } else {
-                startPoints.put(com.startName,startLoc);
+                startPoints.put(com.startName, startLoc);
                 sGPS.writeSG(startPoints);
-                launchMonitor();
+                bStLo.setText(com.startName);
             }
-        } else launchMonitor();
+        }
     }
 
     void launchMonitor(){
@@ -285,8 +323,14 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("plane",com.plane);
         intent.putExtra("comment",com.comment);
         intent.putExtra("pathStartGPS",pathStartGPS);
+        intent.putExtra("refPath", refPath);
         if (testPath!=null) intent.putExtra("testPath",testPath);
-        if (startName!=null) intent.putExtra("startName",startName);
+        if (startName!=null){
+            intent.putExtra("startName",startName);
+            sGPS=new StartGPS(com.pathStartGPS);
+            startPoints=sGPS.readSG();
+            startLoc=startPoints.get(com.startName);
+        }
         if (startLoc!=null) intent.putExtra("Location",startLoc);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivityForResult(intent,1);
@@ -333,11 +377,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 if (preselect==null || preselect<0){
                     com.startName=null;
-                    launchMonitor();
+                    bStLo.setText("-none-");
                 } else if (preselect<ar.length){
                     com.startName=ar[preselect];
                     startLoc=startPoints.get(com.startName);
-                    launchMonitor();
+                    bStLo.setText(com.startName);
                 } else if (preselect==ar.length){
                     startLocate();
                 } else if (preselect==ar.length+1){
@@ -351,21 +395,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         com.startName=null;
-                        launchMonitor();
+                        bStLo.setText("-none-");
                     }
                 })
            .setSingleChoiceItems(items, preselect, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         preselect=which;
-
                     }
                 })
            .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         com.startName=null;
-                        launchMonitor();
+                        bStLo.setText("-none-");
                     }
                 });
         build.show();
@@ -407,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent,activCopyFix);
         } else {
             com.startName=null;
-            launchMonitor();
+            bStLo.setText("-none-");
         }
 
     }

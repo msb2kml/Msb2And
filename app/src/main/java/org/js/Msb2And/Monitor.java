@@ -1,5 +1,6 @@
 package org.js.Msb2And;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
@@ -25,16 +25,12 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 
 public class Monitor extends AppCompatActivity {
@@ -48,6 +44,7 @@ public class Monitor extends AppCompatActivity {
     private DispRecord disp;
     private Intent intent;
     private MyHandler mHandler;
+    private VHandler vHandler;
     public comRx Rx;
     public comSim Sim;
     public comSoufl Souf;
@@ -58,6 +55,7 @@ public class Monitor extends AppCompatActivity {
     public String pathMSBfile=null;
     public String pathMeta=null;
     public String pathStartGPS;
+    public String refPath =null;
     public String startName=null;
     public String startDate="";
     public Calendar startTime=null;
@@ -79,6 +77,9 @@ public class Monitor extends AppCompatActivity {
     ArrayList<CompReading> listComp=new ArrayList<>();
     Intent intentMap=null;
     Boolean runningMap=false;
+    Boolean waitMap=false;
+    IntentFilter filter=new IntentFilter("org.js.ACK");
+    Boolean startTrk=true;
     Double zoom=17.0;
     Integer reqCdStore=1;
     Integer objPosMap=null;
@@ -116,6 +117,7 @@ public class Monitor extends AppCompatActivity {
         named=intent.getBooleanExtra("named", false);
         pathMSBfile=intent.getStringExtra("pathMSBfile");
         pathMeta=intent.getStringExtra("pathMeta");
+        refPath =intent.getStringExtra(("refPath"));
         plane=intent.getStringExtra("plane");
         comment=intent.getStringExtra("comment");
         testPath=intent.getStringExtra("testPath");
@@ -238,23 +240,10 @@ public class Monitor extends AppCompatActivity {
             }
         }
 */
-        if (runningMap) {
-            Intent nt = new Intent();
-            nt.setAction("org.js.LOC");
-            nt.putExtra("LOC", prevLoca);
-            if (bubbleMap!=null) nt.putExtra("BUBBLE",bubbleMap);
-            if (colorVar!=null){
-                ArrayList<Float> zz=(ArrayList<Float>) colorVar.thing;
-                Float percent=zz.get(colorVar.index)/100f;
-                int v=Math.round(percent*nColor);
-                v=Math.max(1,Math.min(nColor,v))-1;
-                int color=lineColor[v];
-                nt.putExtra("COLOR",color);
-            }
-            sendBroadcast(nt);
-        }
+        if (runningMap) addPointMap();
         return null;
     }
+
 
     public void skipChoice(){
         String theList[]={"Skip 20 s ","Skip 120 s","Skip 10 min"};
@@ -346,6 +335,7 @@ public class Monitor extends AppCompatActivity {
         else if (!newState && from==getResources().getInteger(R.integer.Simu)){
             onAir.setEnabled(false);
             onAir.setText("The End");
+            Toast.makeText(context,"End of file",Toast.LENGTH_LONG).show();
         }
         return;
     }
@@ -373,6 +363,8 @@ public class Monitor extends AppCompatActivity {
             }
         }
     }
+
+
 /*
     private RecordReading getRandomReading(){
         RecordReading rec=new RecordReading();
@@ -570,6 +562,54 @@ public class Monitor extends AppCompatActivity {
         return listComp;
     }
 
+    public Location nameToLoc(String pylone){
+        Location loc=null;
+        if (pathStartGPS==null) return null;
+        StartGPS sGPS=new StartGPS(pathStartGPS);
+        Map<String,Location> startPoints=sGPS.readSG();
+        if (startPoints.isEmpty()) return null;
+        if (!startPoints.containsKey(pylone)) return null;
+        loc=startPoints.get(pylone);
+        return loc;
+    }
+
+////////////////   MAP
+
+    void addPointMap(){
+    int color=Color.BLACK;
+    if (colorVar!=null){
+        ArrayList<Float> zz=(ArrayList<Float>) colorVar.thing;
+        Float percent=zz.get(colorVar.index)/100f;
+        int v=Math.round(percent*nColor);
+        v=Math.max(1,Math.min(nColor,v))-1;
+        color=lineColor[v];
+    }
+    dispTrk(prevLoca,bubbleMap,color,startTrk,true);
+    startTrk=false;
+}
+
+    void dispWpt(Location loc, String name, int typ){
+        Intent nt = new Intent();
+        nt.setAction("org.js.LOC");
+        nt.putExtra("WPT",loc);
+        nt.putExtra("WPT_NAME",name);
+        nt.putExtra("TYPE",typ);
+        sendBroadcast(nt);
+    }
+
+    void dispTrk(Location loc, String bubble, int color, Boolean startLine, Boolean actTail){
+        Intent nt = new Intent();
+        nt.setAction("org.js.LOC");
+        nt.putExtra("LOC",loc);
+        nt.putExtra("COLOR",color);
+        nt.putExtra("BUBBLE",bubble);
+        if (startLine){
+            nt.putExtra("START",startLine);
+            nt.putExtra("Tail",actTail);
+        }
+        sendBroadcast(nt);
+    }
+
     public void checkMap(){
         if (startName==null) return;
         PackageManager Pm=getPackageManager();
@@ -585,28 +625,75 @@ public class Monitor extends AppCompatActivity {
     }
 
     public void runMap(Integer position){
+        if (waitMap) return;
         if (intentMap==null) return;
         objPosMap=position;
         Intent nt=(Intent) intentMap.clone();
         nt.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        nt.putExtra("CALLER","Msb2And");
+        nt.putExtra("CALLER",context.getString(R.string.app_name));
         nt.putExtra("CENTER",startLoc);
+        nt.putExtra("Tail",true);
+        nt.putExtra("StartGPS",false);
         if (zoom!=null) nt.putExtra("ZOOM",zoom);
         zoom=null;
-        runningMap=true;
+        runningMap=false;
+        waitMap=true;
+        startTrk=true;
+        registerReceiver(mReceiver,filter);
         startActivity(nt);
     }
 
-    public Location nameToLoc(String pylone){
-        Location loc=null;
-        if (pathStartGPS==null) return null;
-        StartGPS sGPS=new StartGPS(pathStartGPS);
-        Map<String,Location> startPoints=sGPS.readSG();
-        if (startPoints.isEmpty()) return null;
-        if (!startPoints.containsKey(pylone)) return null;
-        loc=startPoints.get(pylone);
-        return loc;
+    private final BroadcastReceiver mReceiver=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!waitMap) return;
+            String origin = intent.getStringExtra("NAME");
+            int vc=intent.getIntExtra("VERSION",0);
+            unregisterReceiver(mReceiver);
+            ckVcMap(vc);
+            waitMap = false;
+            if (refPath ==null) beginTrk();
+            else setRefG();
+        }
+    };
+
+    void ckVcMap(int vc){
+        if (vc<16){
+            Toast.makeText(context,"Msb2Map revision should be at least 1.6",
+                    Toast.LENGTH_LONG).show();
+        }
     }
+
+    void setRefG(){
+        vHandler=new VHandler(Monitor.this);
+        Vtrack vtr=new Vtrack();
+        vtr.vtrk(context,vHandler, refPath);
+    }
+
+    private static class VHandler extends Handler {
+        public final WeakReference<Monitor> mActivity;
+
+        public VHandler(Monitor activity){
+            mActivity=new WeakReference<Monitor>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg){
+            int code=msg.what;
+            switch (code) {
+                case 0:
+                    mActivity.get().beginTrk();
+                    break;
+            }
+        }
+    }
+
+    void beginTrk(){
+        dispWpt(startLoc,startName,1);
+        runningMap=true;
+    }
+
+///////////////
 
 
 

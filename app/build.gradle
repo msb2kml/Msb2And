@@ -6,8 +6,6 @@ android {
         applicationId "org.js.Msb2And"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 15
-        versionName '1.5 Color normalization'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

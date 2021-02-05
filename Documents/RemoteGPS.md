@@ -5,10 +5,10 @@ the location data (latitude, longitude and altitude).
 This data is not transmitted through the telemetry protocol and
 thus is not usually available for the Msb2And application.
 
-But it is able to reconstruct the location data from the telemetry data.
+But it is possible to reconstruct the location data from the telemetry data.
 The following explanations are relative to this reconstruction.
 
-# Preparation of the GPS module
+## Preparation of the GPS module
 
 The Multiplex Launcher program should have been used to attribute
 a MSB address to three essentials measurements:
@@ -22,17 +22,23 @@ Together theses measurements gives the position of the plane in
 a cylindrical system of coordinates centered on the pilot (in reality
 the center is the place of the first valid fix by the GPS module).
 
-Theses measures could be used in a formula to convert them to a common
-location if the location of the pilot is known.
+Theses measures could be used in a formula to convert them to a geographic
+position if the location of the pilot is known.
 
-# Pilot location
+## Condition
 
-Each known pilot locations is referenced for the application by a name.  
-This name is a label for a location stored in a file
-StartGPS.gpx in the MSBlog directory.  
-The file StartGPS.gpx is shared with the application Msb2Kml
-and could be opened by an application like Msb2Map
-to check the locations on a map.
+The reconstruction is performed by the function "=GPS" in
+the file AddrSens.txt: see "**AdvancedUse**".  
+Another condition is that a start location of the flight has been
+provided with the appropriate button of the initial menu. 
+
+## Pilot location
+
+A table of known pilot locations is maintained in a file **StartGPS.gpx**
+in the MSBlog directory.  
+The location is selected by the name that reference it.    
+A named location could have been prepared before or it could be specified
+just before the flight.
 
 There are three methods available to record such a location:
 
@@ -41,18 +47,13 @@ There are three methods available to record such a location:
 + copy the location from a previously processed flight with
  the logger on board.
 
-See the screenshot [Screenshot_Locate](Screenshots/Screenshot_Locate.jpg).
+See the screenshot [Screenshot\_Locate](Screenshots/Screenshot_Locate.jpg).
 
-# Condition
+The file StartGPS.gpx could be opened by an application such as
+[Vtrk](https://github.com/msb2kml/Vtrk) to check the locations on a map.  
+This application could also be used to add locations to this file.
 
-The reconstruction is performed by the function "=GPS" in
-the file AddrSens.txt: see "**AdvancedUse**".  
-If the file AddrSens.txt is used, a menu is presented.  
-On this menu you have all the locations known in the file StartGPS.gpx
-and an entry for each of the previously cited methods.  
-No reconstruction is performed if this menu is canceled.
-
-# Location with GPS of device
+## Location with GPS of device
 
 You could be asked to modify two settings:
 
@@ -65,7 +66,7 @@ accuracy.
 You should give a meaningful name to this location before accepting it.  
 The default name is a combination of the date and hour.
 
-# Entering a location
+## Entering a location
 
 You are presented with a form to enter the latitude and longitude in 
 decimal degrees, and the altitude in meters.  
@@ -75,7 +76,7 @@ If the location you have is in degrees, minutes, seconds you could
 convert it with some utilities like
 [RapidTables](https://www.rapidtables.com/convert/number/degrees-minutes-seconds-to-degrees.html).
 
-# Copying a location
+## Copying a location
 
 You are first presented a list of the previous flight for which there
 exists a GPX file.  
