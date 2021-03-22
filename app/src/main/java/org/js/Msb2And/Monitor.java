@@ -77,7 +77,10 @@ public class Monitor extends AppCompatActivity {
     ArrayList<CompReading> listComp=new ArrayList<>();
     Intent intentMap=null;
     Boolean runningMap=false;
+    Boolean useMap=false;
     Boolean waitMap=false;
+    Boolean rotMap=false;
+    Location arrowOrg=null;
     IntentFilter filter=new IntentFilter("org.js.ACK");
     Boolean startTrk=true;
     Double zoom=17.0;
@@ -123,6 +126,7 @@ public class Monitor extends AppCompatActivity {
         testPath=intent.getStringExtra("testPath");
         startName=intent.getStringExtra("startName");
         startLoc=intent.getParcelableExtra("Location");
+        rotMap=intent.getBooleanExtra("Orient",false);
         if (named){
             for (int i=0;i<16;i++){
                 fData.add(0.0f);
@@ -299,7 +303,13 @@ public class Monitor extends AppCompatActivity {
             lastIntent.putExtra("pathMeta",pathMeta);
             lastIntent.putExtra("plane",plane);
             lastIntent.putExtra("comment",comment);
-            if (startName!=null) lastIntent.putExtra("startName",startName);
+            if (startName!=null) {
+                lastIntent.putExtra("startName",startName);
+                lastIntent.putExtra("startLoc",startLoc);
+                if (!useMap) prevLoca=null;
+                lastIntent.putExtra("prevLoca",prevLoca);
+                lastIntent.putExtra("StartGPS",pathStartGPS);
+            }
             startActivityForResult(lastIntent,reqCdStore);
         }
     }
@@ -606,6 +616,19 @@ public class Monitor extends AppCompatActivity {
         if (startLine){
             nt.putExtra("START",startLine);
             nt.putExtra("Tail",actTail);
+            nt.putExtra("ORIENT",0.0f);
+            arrowOrg=null;
+        } else {
+            if (actTail && rotMap) {
+                if (arrowOrg != null) {
+                    float dist = arrowOrg.distanceTo(loc);
+                    if (dist > 10.0f) {
+                        float bearing = -arrowOrg.bearingTo(loc);
+                        nt.putExtra("ORIENT", bearing);
+                        arrowOrg =new Location(loc);
+                    }
+                } else arrowOrg =new Location(loc);
+            }
         }
         sendBroadcast(nt);
     }
@@ -658,8 +681,8 @@ public class Monitor extends AppCompatActivity {
     };
 
     void ckVcMap(int vc){
-        if (vc<16){
-            Toast.makeText(context,"Msb2Map revision should be at least 1.6",
+        if (vc<17){
+            Toast.makeText(context,"Msb2Map revision should be at least 1.7",
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -691,6 +714,7 @@ public class Monitor extends AppCompatActivity {
     void beginTrk(){
         dispWpt(startLoc,startName,1);
         runningMap=true;
+        useMap=true;
     }
 
 ///////////////

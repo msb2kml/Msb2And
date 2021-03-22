@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     final int selRefGpx =15;
     Button bRef =null;
     Button bStLo=null;
+    CheckBox ckUp;
     Boolean firstStart=true;
 
     @Override
@@ -125,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             final CheckBox cNamed = (CheckBox) findViewById(R.id.checkNamed);
             bRef = (Button) findViewById(R.id.bRef);
             bStLo=(Button) findViewById(R.id.bStLo);
+            ckUp=(CheckBox) findViewById(R.id.upCheck);
             refPath = null;
             File f = new File(pathStartGPS);
             refDirectory=f.getParent();
@@ -324,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("comment",com.comment);
         intent.putExtra("pathStartGPS",pathStartGPS);
         intent.putExtra("refPath", refPath);
+        intent.putExtra("Orient",ckUp.isChecked());
         if (testPath!=null) intent.putExtra("testPath",testPath);
         if (startName!=null){
             intent.putExtra("startName",startName);
