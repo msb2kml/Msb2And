@@ -1,6 +1,6 @@
 # Remote GPS
 
-The GPS module put on the data bus, beside the telemetry data,
+The GPS module puts on the data bus, beside the telemetry data,
 the location data (latitude, longitude and altitude).
 This data is not transmitted through the telemetry protocol and
 thus is not usually available for the Msb2And application.
@@ -13,9 +13,9 @@ The following explanations are relative to this reconstruction.
 The Multiplex Launcher program should have been used to attribute
 a MSB address to three essentials measurements:
 
-+ Azimuth: angle (degree) from the North under which the pilot see the plane.
++ Azimuth: angle (degree) from the North under which the pilot sees the plane.
 + Distance 2D: distance (m) from the pilot to the projection of the plane
- on the ground.
+ on the ground (use the expert mode).
 + Height: height (m) relative to the pilot.
 
 Together theses measurements gives the position of the plane in
@@ -89,4 +89,20 @@ its flight has begun, the last fix recorded could be of a better quality.
 Thus, you have the choice to use the first or the last fix.  
 You should enter a unique and meaningful name but the default 
 name is a combination of the date and hour when the fix has been taken.
+
+## End of flight
+
+If the location has been reconstructed and the map displayed,
+the last known position at the end of the application and the start
+position are compared. If their distance is greater than 50 m,
+there is a suspicion of a lost plane.  
+It is proposed to the user to save the last position in the file
+StartGPS.gpx. If this is done, Msb2Map submit to the Android system
+a request to launch an application displaying this location on a map.
+On the technical side it is an intent with a "geo" URI.  
+The system presents to the user a list of the applications able to
+perform this task. This list could contain the Vtrk application
+and also any guiding application installed on the device.  
+In the hope that the retrieval of the plane should be eased...
+
 

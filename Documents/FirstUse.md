@@ -36,6 +36,7 @@ This application Msb2And start at "**MSB\_5000.csv**" and increments
 until a free name is found.
 
 ## Starting
+
 The USB-OTG cable should be connected to the Android device.
 For some configurations it is necessary to provide a power supply
 to the USB bus.  
@@ -64,7 +65,8 @@ on the map: see the file "**RemoteGPS**" in this directory.
 ![Screenshot_Start](Screenshots/Screenshot_Start.jpg).
 
 ## Monitoring
-Once the data source has been selected you are presented with
+
+When the data source has been selected, you are presented with
 a button "**Start**". Listening for data starts when this button is pushed.  
 You could have to authorize the access to the USB port.
 
@@ -93,6 +95,7 @@ The file "**AddrSens.txt**" on the base directory "**MSBlog**"
 could be used to give a name to the addresses
 
 ### Basic use of AddrSens.txt
+
 This file provides some customization.  
 Any line of this file starting with a star "\*" is a comment that
 is skipped.  
@@ -118,6 +121,7 @@ by ignored white spaces: this provides for a better readability.
 ![Screeshot_Slope](Screenshots/Screenshot_Slope.jpg).
 
 ## Stop monitoring
+
 The application run until the "**Stop**" button is pushed.  
 It is the end if the right to write to storage has not been granted.
 
@@ -136,3 +140,10 @@ There are fields to enter the plane name and the comment.
 Then there are 2 buttons: "**Forget it**" and "**Record it**".
 The files are not recorded but erased if "**Forget it**" is pushed and kept
 if the other button is pushed.
+
+## Special end processing
+
+If the GPS module and the map have been used, there is a feature to
+help recover a lost plane if needed. See the **RemoteGPS** file
+in this directory.
+

@@ -1,6 +1,8 @@
 # Purpose
+
 The Msb2And Android application is designed to display in flight the
-data collected by the sensors on the MSB telemetry bus.  
+data collected by the sensors on the MSB telemetry bus and transmitted
+on the downward link.  
 It is able to use this data to compute and display secondary parameters.  
 Among theses capabilities there is the possibility to compute
 the geographic position of the plane from the telemetry
@@ -36,7 +38,7 @@ It could be compiled from the sources in this repository or
 downloaded from the [Releases](https://github.com/msb2kml/Msb2And/releases)
 pages.
 
-In each case the application package (such as Msb2And160.apk) should be
+In each case the application package (such as Msb2And170.apk) should be
 transferred to the storage of the device (such as Downloads).
 Selecting it with a File Manager should offer the opportunity
 to install it.

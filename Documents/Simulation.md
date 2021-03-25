@@ -2,13 +2,13 @@
 
 Instead of getting data from the Souffleur or from the MSB bus
 of the receiver it is possible to replay a flight recorded
-by the Flight Recorder or this application.  
+by the Flight Recorder or this same application.  
 This could be useful to check a configuration before a flight.
 
 ## Selection
 
 The file used for the simulation is selected through a specialized
-"file explorer" exactly like done for the Msb2Kml application.  
+"File Explorer" exactly like done for the Msb2Kml application.  
 This file could be situated in the local storage noted
 **"[\*Fixed\*]"** or from a remote storage noted as
 **[\*Removable\*]"**.
