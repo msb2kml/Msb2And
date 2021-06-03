@@ -76,6 +76,7 @@ public class Monitor extends AppCompatActivity {
     ArrayList<String> compHead=new ArrayList<>();
     ArrayList<CompReading> listComp=new ArrayList<>();
     Intent intentMap=null;
+    Intent intentGoTo=null;
     Boolean runningMap=false;
     Boolean useMap=false;
     Boolean waitMap=false;
@@ -303,6 +304,7 @@ public class Monitor extends AppCompatActivity {
             lastIntent.putExtra("pathMeta",pathMeta);
             lastIntent.putExtra("plane",plane);
             lastIntent.putExtra("comment",comment);
+            lastIntent.putExtra("GoTo",intentGoTo);
             if (startName!=null) {
                 lastIntent.putExtra("startName",startName);
                 lastIntent.putExtra("startLoc",startLoc);
@@ -641,7 +643,8 @@ public class Monitor extends AppCompatActivity {
             String zz=AI.packageName;
             if (zz.matches("org.js.Msb2Map")){
                 intentMap=Pm.getLaunchIntentForPackage(zz);
-                break;
+            } else if (zz.matches("org.js.agoto")){
+                intentGoTo=Pm.getLaunchIntentForPackage(zz);
             }
         }
         return;

@@ -44,6 +44,7 @@ public class Storage extends AppCompatActivity {
     Location startLoc=null;
     Location prev_Loca=null;
     String pathStartGPS=null;
+    Intent intentGoTo=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class Storage extends AppCompatActivity {
         startLoc=intent.getParcelableExtra("startLoc");
         prev_Loca=intent.getParcelableExtra("prevLoca");
         pathStartGPS=intent.getStringExtra("StartGPS");
+        intentGoTo=intent.getParcelableExtra("GoTo");
         viewStart=(TextView) findViewById(R.id.startTime);
         viewLoc=(TextView) findViewById(R.id.startLoc);
         viewDuration=(TextView) findViewById(R.id.duration);
@@ -102,9 +104,11 @@ public class Storage extends AppCompatActivity {
     }
 
     void ckRescue(){
-        if (pathStartGPS==null) finish();
+        if (pathStartGPS==null ||startLoc==null || prev_Loca==null ){
+            finish();
+            return;
+        }
         SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        if (startLoc==null || prev_Loca==null) return;
         Float dist=startLoc.distanceTo(prev_Loca);
         if (dist<50.0f) return;
         Calendar now= Calendar.getInstance();
@@ -116,9 +120,6 @@ public class Storage extends AppCompatActivity {
                 prev_Loca.getLatitude(),prev_Loca.getLongitude(),prev_Loca.getAltitude());
         String mesg=situation+"\nDo you want to save the last known location \n"+LastKL+
                 "\nunder the name "+defName+" in the StartGPS.gpx file?";
-        String geo=String.format(Locale.ENGLISH,"geo:0,0?q=%.6f,%.6f(%s)",
-                prev_Loca.getLatitude(),prev_Loca.getLongitude(),defName);
-        final Uri uriGeo=Uri.parse(geo);
         AlertDialog.Builder build=new AlertDialog.Builder(this);
         build.setTitle("Retrieval Help");
         build.setMessage(mesg);
@@ -132,8 +133,7 @@ public class Storage extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         saveLKL(defName,prev_Loca);
-                        Intent mapIntent=new Intent(Intent.ACTION_VIEW,uriGeo);
-                        startActivity(mapIntent);
+                        launchGuide(defName);
                         finish();
                     }
                 })
@@ -151,6 +151,23 @@ public class Storage extends AppCompatActivity {
         Map<String,Location> startPoints=sGPS.readSG();
         startPoints.put(name,loc);
         sGPS.writeSG(startPoints);
+    }
+
+    void launchGuide(String defName){
+        if (intentGoTo==null){
+            String geo=String.format(Locale.ENGLISH,"geo:0,0?q=%.6f,%.6f(%s)",
+                prev_Loca.getLatitude(),prev_Loca.getLongitude(),defName);
+            final Uri uriGeo=Uri.parse(geo);
+            Intent mapIntent=new Intent(Intent.ACTION_VIEW,uriGeo);
+            startActivity(mapIntent);
+        } else {
+            Bundle bundle=new Bundle();
+            prev_Loca.setExtras(bundle);
+            prev_Loca.getExtras().putString("name",defName);
+            Intent mapIntent=(Intent) intentGoTo.clone();
+            mapIntent.putExtra("Target",prev_Loca);
+            startActivity(mapIntent);
+        }
     }
 
 }

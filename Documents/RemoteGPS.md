@@ -97,7 +97,10 @@ the last known position at the end of the application and the start
 position are compared. If their distance is greater than 50 m,
 there is a suspicion of a lost plane.  
 It is proposed to the user to save the last position in the file
-StartGPS.gpx. If this is done, Msb2Map submit to the Android system
+StartGPS.gpx.  
+If the application [GoTo](https://github.com/msb2kml/GoTo)
+is available, it is launched with the last known location as target.  
+And, without this application, Msb2Map submit to the Android system
 a request to launch an application displaying this location on a map.
 On the technical side it is an intent with a "geo" URI.  
 The system presents to the user a list of the applications able to

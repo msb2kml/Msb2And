@@ -133,6 +133,18 @@ public class GetFix extends AppCompatActivity {
         if (!waitOK) checkPerm();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if (requestCode==100){
+            if (grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                checkPerm();
+            } else notAv();
+        }
+    }
+
+
     void checkPerm() {
         granted = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -144,30 +156,43 @@ public class GetFix extends AppCompatActivity {
                 notAv();
             }
             enabled=lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } else {
+            AlertDialog.Builder builder=new AlertDialog.Builder(this);
+            builder.setTitle("GPS permission for "+getString(R.string.app_name));
+            builder.setMessage("Please allow GPS access")
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                notAv();
+                            }
+                        })
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                waitOK = false;
+                                ActivityCompat.requestPermissions(GetFix.this,
+                                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                            100);
+                                }
+                        });
+            builder.show();
+            return;
         }
-        if (granted && enabled) follow2();
+        if (enabled) follow2();
         else {
             vStat.setText("No access to GPS");
             rejectPerm=true;
             waitOK=true;
             AlertDialog.Builder builder=new AlertDialog.Builder(this);
             builder.setTitle("GPS for "+getString(R.string.app_name))
-                    .setMessage("Please enable GPS location and allow access for "+
-                        getString(R.string.app_name))
+                    .setMessage("Please enable GPS location")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 waitOK = false;
                                 Intent intent;
-                                if (granted){
                                     intent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                     startActivity(intent);
-                                }
-                                else {
-                                    ActivityCompat.requestPermissions(GetFix.this,
-                                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                            100);
-                                }
                             }
                         })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -224,15 +249,21 @@ public class GetFix extends AppCompatActivity {
             } else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
                 vStat.setText("GPS temporarily unavailable");
             } else if (status == LocationProvider.AVAILABLE) {
-                GpsStatus gstat = lm.getGpsStatus(null);
-                Integer tot_sat = 0;
-                Integer fix_sat = 0;
-                for (GpsSatellite sat : gstat.getSatellites()) {
-                    if (sat.usedInFix()) fix_sat++;
-                    tot_sat++;
+                GpsStatus gstat;
+                try {
+                    gstat = lm.getGpsStatus(null);
+                    Integer tot_sat = 0;
+                    Integer fix_sat = 0;
+                    for (GpsSatellite sat : gstat.getSatellites()) {
+                        if (sat.usedInFix()) fix_sat++;
+                        tot_sat++;
+                    }
+                    vStat.setText("Satellites in use: " +
+                            fix_sat.toString() + "/" + tot_sat.toString());
+                } catch (SecurityException e) {
+                    gstat=null;
+                    vStat.setText("GPS available");
                 }
-                vStat.setText("Satellites in use: " +
-                        fix_sat.toString() + "/" + tot_sat.toString());
             }
         }
 
